@@ -74,7 +74,6 @@
   .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 10px; vertical-align: middle; background: var(--muted); }
   .dot.in { background: var(--in); box-shadow: 0 0 0 4px color-mix(in srgb, var(--in) 20%, transparent); }
   .dot.out { background: var(--out); box-shadow: 0 0 0 4px color-mix(in srgb, var(--out) 20%, transparent); }
-  .clock { font-size: 14px; color: var(--muted); margin-top: 12px; }
 
   .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
   .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 10px; text-align: center; box-shadow: var(--shadow); }
@@ -120,7 +119,6 @@
     <p class="sub" style="text-align:center">جاري التحميل…</p>
   </section>
 
-  <!-- Login -->
   <section id="login" class="hidden">
     <div class="hero" aria-hidden="true"><svg viewBox="0 0 120 120" width="76" height="76">
       <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2"/>
@@ -152,7 +150,6 @@
     </div>
   </section>
 
-  <!-- Student home -->
   <section id="home" class="hidden">
     <div class="top">
       <div>
@@ -176,7 +173,6 @@
     <div id="s-log"></div>
   </section>
 
-  <!-- Teacher -->
   <section id="teacher" class="hidden">
     <div class="top">
       <div>
@@ -337,7 +333,6 @@
     finally { if (stream) stream.getTracks().forEach((t) => t.stop()); }
   }
 
-  // ---------- Shared log renderer ----------
   function renderLog(container, records, countEl, opts = {}) {
     const { teacher = false, code = "", onDel = null } = opts;
     container.innerHTML = "";
@@ -422,7 +417,6 @@
     });
   }
 
-  // ---------- Student ----------
   let me = null;
   let writeChain = Promise.resolve();
 
@@ -482,11 +476,17 @@
     const dist = loc && school && school.lat != null ? distM(loc, school) : null;
     const out = dist !== null && dist > (school.radius || 30);
 
+    let photoSaved = false;
     if (photo) {
-      setDoc(doc(db, "students", me.code, "photos", String(ts)), { img: photo }).catch(() => {});
+      try {
+        await setDoc(doc(db, "students", me.code, "photos", String(ts)), { img: photo });
+        photoSaved = true;
+      } catch {
+        photoSaved = false;
+      }
     }
 
-    me.records.push({ type, ts, loc, photo: !!photo, out, dist });
+    me.records.push({ type, ts, loc, photo: photoSaved, out, dist });
     renderStudent();
     const ok = await saveMe();
     $("in-btn").disabled = false; $("out-btn").disabled = false;
@@ -494,6 +494,7 @@
     const parts = [];
     if (!loc) parts.push("الموقع");
     if (!photo) parts.push("الصورة");
+    else if (!photoSaved) parts.push("حفظ الصورة");
     if (out) parts.push("أنت بعيد عن المدرسة (" + dist + " متر)، التسجيل اتحفظ كخارج المدرسة");
     if (ok) $("s-msg").textContent = parts.length ? "ما قدرناش نحدد " + parts.join(" ولا ") + "." : "";
   }
@@ -544,7 +545,6 @@
     }
   });
 
-  // ---------- Teacher login ----------
   $("show-teacher").addEventListener("click", () => {
     $("student-form").classList.add("hidden");
     $("teacher-form").classList.remove("hidden");
@@ -564,13 +564,11 @@
     }
   });
 
-  // ---------- Teacher ----------
   let students = [];
   let currentGroup = "";
   let detail = null;
   let privInfo = {};
   let unsubStudents = null;
-  let schoolCache = null;
 
   function studentStatus(s) {
     const last = lastToday(s.records || []);
@@ -824,7 +822,6 @@
     }
   }
 
-  // ---------- Start ----------
   onAuthStateChanged(auth, async (user) => {
     if (user && !user.isAnonymous && user.email === TEACHER_EMAIL) {
       startTeacher();
@@ -848,4 +845,4 @@
   });
 </script>
 </body>
-  </html>
+</html>
