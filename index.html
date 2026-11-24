@@ -62,11 +62,10 @@ button.row{cursor:pointer}
   <h1 style="text-align:center;margin-top:30px">حضور وانصراف</h1>
   <p class="sub" style="text-align:center;margin-top:6px">حصة الفيزياء · سجّل حضورك وانصرافك بضغطة واحدة.</p>
   <div id="sform">
-    <div class="field"><label>رقم الطالب</label><input id="code" inputmode="numeric" autocomplete="off"></div>
     <div class="field"><label>الاسم</label><input id="fname" autocomplete="name" placeholder="اكتب اسمك كما كتبه المدرس"></div>
+    <div class="field"><label>رقم الطالب</label><input id="code" inputmode="numeric" autocomplete="off"></div>
     <p class="error" id="serr"></p>
     <button class="btn" id="login-s">دخول</button>
-    <div style="text-align:center"><button class="link" id="to-t">دخول المدرس</button></div>
   </div>
   <div id="tform" class="hidden">
     <div class="field"><label>الإيميل</label><input id="temail" inputmode="email" autocomplete="username"></div>
@@ -177,7 +176,7 @@ const app=initializeApp({apiKey:"AIzaSyAXfBTspoxshk1PHViFon4gfORbFP3S7mA",authDo
 const auth=getAuth(app),db=getFirestore(app);
 const TEACHER="tttb58393@gmail.com",GROUPS=["أولى ثانوي","تانية ثانوي","تالتة ثانوي"],SK="attendance-student-code";
 const DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],DAY_ORDER=[6,0,1,2,3,4,5];
-const LATE_MS=10*60000,WINDOW_DAYS=45;
+const LATE_MS=10*60000,WINDOW_DAYS=45,DAY_MS=864e5;
 const $=id=>document.getElementById(id),norm=s=>String(s||"").replace(/\s+/g," ").trim();
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const AR_DATE=new Intl.DateTimeFormat("ar-EG",{weekday:"long",day:"numeric",month:"long"});
@@ -194,10 +193,12 @@ function show(id){["loading","login","student","teacher"].forEach(s=>$(s).classL
 function fillGroups(sel,cur,all){sel.innerHTML=(all?'<option value="">كل المجموعات</option>':"")+GROUPS.map(g=>`<option>${g}</option>`).join("");sel.value=cur||(all?"":GROUPS[0])}
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{const nav=b.parentElement;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));const sec=nav.id==="stabs"?$("student"):$("teacher");sec.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden",p.id!==b.dataset.p));if(b.dataset.p==="p-abs")renderReport()}));
 
+/* الصورة تظهر 24 ساعة بس (وFirebase يمسحها نهائيًا بـ TTL) */
+const photoFresh=r=>r.photoId&&Date.now()-Number(r.photoId)<DAY_MS;
 function logHTML(recs,T){
-  return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${r.photoId?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}${r.method==="bio"?" (بصمة)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>';
+  return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${photoFresh(r)?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}${r.method==="bio"?" (بصمة)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>';
 }
-function loadThumbs(box){box.querySelectorAll("img[data-p]").forEach(i=>getDoc(doc(db,"students",i.dataset.c,"photos",i.dataset.p)).then(s=>{if(s.exists())i.src=s.data().img}).catch(()=>{}))}
+function loadThumbs(box){box.querySelectorAll("img[data-p]").forEach(i=>getDoc(doc(db,"students",i.dataset.c,"photos",i.dataset.p)).then(s=>{if(s.exists())i.src=s.data().img;else i.remove()}).catch(()=>{}))}
 
 /* ===== البصمة ===== */
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
@@ -228,12 +229,12 @@ $("big").addEventListener("click",async()=>{
   const last=lastToday(myAtt.concat(me.legacy)),type=last&&last.type==="in"?"out":"in",b=$("big");
   b.disabled=true;$("s-msg").style.color="";
   if(me.bio){$("s-msg").textContent="ضع بصمتك أو وجهك…";try{await bioVerify()}catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما اتأكدناش من البصمة. جرّب تاني.";b.disabled=false;return}}
-  $("s-msg").textContent=me.bio?"بنحدد موقعك…":"بنحدد موقعك وبنصوّرك…";
-  const[loc,photo]=await Promise.all([getLoc(),me.bio?null:getPhoto()]);
+  $("s-msg").textContent="بنحدد موقعك وبنصوّرك…";
+  const[loc,photo]=await Promise.all([getLoc(),getPhoto()]);
   let school=null;try{const sn=await getDoc(doc(db,"settings","school"));school=sn.exists()?sn.data():null}catch{}
   const dist=loc&&school&&school.lat!=null?distM(loc,school):null,out=dist!==null&&dist>(school.radius||30);
   let photoId=null;
-  if(photo){const id=String(Date.now());try{await setDoc(doc(db,"students",me.code,"photos",id),{img:photo});photoId=id}catch{}}
+  if(photo){const id=String(Date.now());try{await setDoc(doc(db,"students",me.code,"photos",id),{img:photo,expireAt:new Date(Date.now()+DAY_MS)});photoId=id}catch{}}
   try{
     await addDoc(collection(db,"att"),{code:me.code,uid:auth.currentUser.uid,type,ts:serverTimestamp(),loc,out,dist,method:me.bio?"bio":"photo",photoId});
     navigator.vibrate&&navigator.vibrate([60,40,60]);
@@ -256,7 +257,7 @@ async function enterStudent(code,uid){
 }
 $("login-s").addEventListener("click",async()=>{
   const code=$("code").value.trim(),name=norm($("fname").value);$("serr").textContent="";
-  if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("serr").textContent="اكتب رقم الطالب والاسم.";return}
+  if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("serr").textContent="اكتب الاسم ورقم الطالب.";return}
   try{
     if(!auth.currentUser)await signInAnonymously(auth);
     const sn=await getDoc(doc(db,"students",code));
@@ -264,8 +265,11 @@ $("login-s").addEventListener("click",async()=>{
     const r=await enterStudent(code,auth.currentUser.uid);if(r.error)$("serr").textContent=r.error;
   }catch{$("serr").textContent="في مشكلة في الاتصال. جرّب تاني."}
 });
-$("to-t").addEventListener("click",()=>{$("sform").classList.add("hidden");$("tform").classList.remove("hidden");$("temail").value=TEACHER});
-$("to-s").addEventListener("click",()=>{$("tform").classList.add("hidden");$("sform").classList.remove("hidden")});
+
+/* دخول المدرس: مخفي، بيظهر بس لو الرابط آخره #teacher */
+function loginMode(){const t=location.hash==="#teacher";$("sform").classList.toggle("hidden",t);$("tform").classList.toggle("hidden",!t)}
+addEventListener("hashchange",loginMode);loginMode();
+$("to-s").addEventListener("click",()=>{location.hash=""});
 $("login-t").addEventListener("click",async()=>{$("terr").textContent="";try{await signInWithEmailAndPassword(auth,$("temail").value.trim(),$("tpass").value);$("tpass").value=""}catch{$("terr").textContent="الإيميل أو كلمة السر غلط."}});
 
 /* ===== المدرس ===== */
@@ -281,7 +285,7 @@ function report(from,to,group){
   students.filter(s=>!group||s.group===group).forEach(s=>{
     const recs=recsOf(s).sort((a,b)=>a.ts-b.ts);
     for(const d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
-      if(s.created&&d.getTime()+864e5<s.created)continue;
+      if(s.created&&d.getTime()+DAY_MS<s.created)continue;
       const k=dk(d.getTime()),day=recs.filter(r=>dk(r.ts)===k),st=sessStart(s.group,d),first=day.find(r=>r.type==="in");
       if(st&&st<now&&!first)res.push({s,d:new Date(d),t:"absent"});
       else if(first&&st&&first.ts>st+LATE_MS)res.push({s,d:new Date(d),t:"late"});
@@ -363,7 +367,7 @@ $("add-btn").addEventListener("click",async()=>{
     $("a-code").value=$("a-name").value=$("a-guard").value="";$("a-err").style.color="var(--in)";$("a-err").textContent="تمت الإضافة."}catch{$("a-err").textContent="ما قدرناش نضيف الطالب."}
 });
 $("export").addEventListener("click",()=>{
-  const f=$("e-from").value?new Date($("e-from").value).getTime():-Infinity,t=$("e-to").value?new Date($("e-to").value).getTime()+864e5:Infinity;
+  const f=$("e-from").value?new Date($("e-from").value).getTime():-Infinity,t=$("e-to").value?new Date($("e-to").value).getTime()+DAY_MS:Infinity;
   const rows=[["الكود","الاسم","المجموعة","الوقت","النوع","خارج المدرسة"]];
   students.forEach(s=>recsOf(s).filter(r=>r.ts>=f&&r.ts<t).forEach(r=>rows.push([s.id,s.name,s.group||"",new Date(r.ts).toLocaleString("ar-EG"),r.type==="in"?"حضور":"انصراف",r.out?"نعم":""])));
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv;charset=utf-8"}));a.download="attendance.csv";document.body.appendChild(a);a.click();a.remove();
@@ -376,7 +380,7 @@ function startTeacher(){
   fillGroups($("r-group"),"",true);fillGroups($("f-group"),"",true);fillGroups($("a-group"),"",false);
   $("r-to").value=ymd(midnight());$("r-from").value=ymd(midnight(-7));$("e-to").value=ymd(midnight());$("e-from").value=ymd(midnight(-30));
   onSnapshot(collection(db,"students"),sn=>{students=sn.docs.map(d=>({id:d.id,...d.data()}));if(detail)detail=students.find(x=>x.id===detail.id)||detail;renderAll()});
-  onSnapshot(query(collection(db,"att"),where("ts",">=",new Date(Date.now()-WINDOW_DAYS*864e5))),sn=>{att=sn.docs.map(toRec);renderAll()});
+  onSnapshot(query(collection(db,"att"),where("ts",">=",new Date(Date.now()-WINDOW_DAYS*DAY_MS))),sn=>{att=sn.docs.map(toRec);renderAll()});
   onSnapshot(doc(db,"settings","schedule"),sn=>{sched=sn.exists()?sn.data():{};renderSched();renderAll()});
   getDocs(collection(db,"private")).then(sn=>{sn.forEach(d=>priv[d.id]=d.data())}).catch(()=>{});
 }
