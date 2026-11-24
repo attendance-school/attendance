@@ -5,864 +5,371 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2563EB">
 <title>حضور وانصراف</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #F4F5FA; --card: #FFFFFF; --ink: #14162B; --muted: #6B7085; --line: #E5E7F0;
-    --accent: #2563EB; --in: #16A34A; --out: #EA580C;
-    --radius: 20px; --shadow: 0 1px 2px rgba(20,22,43,.04), 0 8px 24px rgba(20,22,43,.06);
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #0E1020; --card: #171A2E; --ink: #EEF0FA; --muted: #9097B0; --line: #262A44;
-      --accent: #60A5FA; --in: #4ADE80; --out: #FB923C; --shadow: none; color-scheme: dark;
-    }
-  }
-  * { box-sizing: border-box; margin: 0; }
-  body {
-    font-family: "Tajawal", system-ui, sans-serif; background: var(--bg); color: var(--ink);
-    min-height: 100vh; min-height: 100dvh; line-height: 1.5; -webkit-font-smoothing: antialiased;
-    background-image:
-      linear-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-  .wrap { max-width: 520px; margin: 0 auto; padding: 28px 20px 48px; }
-  h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.01em; }
-  h2 { font-size: 18px; font-weight: 800; }
-  .sub { color: var(--muted); font-size: 15px; margin-top: 6px; }
-  .hidden { display: none !important; }
-  .hero { display: flex; justify-content: center; margin: 8px 0 6px; }
-  .hero svg { overflow: visible; }
-  @media (prefers-reduced-motion: no-preference) { .hero svg { animation: orbit 16s linear infinite; } }
-  @keyframes orbit { to { transform: rotate(360deg); } }
-
-  .field { margin-top: 16px; }
-  label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: var(--muted); }
-  input, select {
-    width: 100%; font: inherit; font-size: 17px; color: var(--ink); background: var(--card);
-    border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; outline: none;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
-
-  .btn {
-    width: 100%; font: inherit; font-size: 17px; font-weight: 700; border: 0; border-radius: 16px;
-    padding: 16px; cursor: pointer; color: #fff; margin-top: 16px; background: var(--accent);
-    box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 28%, transparent); transition: transform .08s, opacity .15s;
-  }
-  .btn:active { transform: scale(.98); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
-  .btn-in { background: var(--in); box-shadow: 0 8px 20px color-mix(in srgb, var(--in) 28%, transparent); }
-  .btn-out { background: var(--out); box-shadow: 0 8px 20px color-mix(in srgb, var(--out) 28%, transparent); }
-  .btn-alt { background: var(--card); color: var(--ink); border: 1px solid var(--line); box-shadow: none; }
-  .link { background: none; border: 0; color: var(--accent); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 18px; padding: 8px; }
-  .back { background: none; border: 0; color: var(--accent); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 0; }
-  .error { color: var(--out); font-size: 14px; margin-top: 10px; min-height: 20px; font-weight: 500; }
-  .msg { color: var(--in); font-size: 14px; margin-top: 10px; min-height: 20px; font-weight: 500; }
-
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; }
-  .hello { font-size: 14px; color: var(--muted); }
-  .name { font-size: 24px; font-weight: 800; }
-  .small-btn { background: transparent; color: var(--accent); border: 0; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; padding: 8px 12px; }
-
-  .card { margin-top: 18px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
-  .card-label { font-size: 14px; color: var(--muted); font-weight: 600; }
-  .card-value { font-size: 26px; font-weight: 800; margin-top: 6px; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 10px; vertical-align: middle; background: var(--muted); }
-  .dot.in { background: var(--in); box-shadow: 0 0 0 4px color-mix(in srgb, var(--in) 20%, transparent); }
-  .dot.out { background: var(--out); box-shadow: 0 0 0 4px color-mix(in srgb, var(--out) 20%, transparent); }
-
-  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 10px; text-align: center; box-shadow: var(--shadow); }
-  .stat b { display: block; font-size: 28px; font-weight: 800; }
-  .stat span { font-size: 13px; color: var(--muted); font-weight: 600; }
-
-  .list-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 28px; }
-  .list-head span { font-size: 14px; color: var(--muted); font-weight: 600; }
-  .day { margin-top: 14px; }
-  .day-title { font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
-  .entry { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; box-shadow: var(--shadow); flex-wrap: wrap; }
-  .entry .kind { font-weight: 700; font-size: 15px; }
-  .entry .kind.in { color: var(--in); }
-  .entry .kind.out { color: var(--out); }
-  .entry .time { font-size: 16px; font-weight: 600; direction: ltr; }
-  .entry .dur { font-size: 13px; color: var(--muted); }
-  .entry .warn { font-size: 13px; color: var(--out); font-weight: 600; }
-  .entry a { font-size: 13px; color: var(--accent); }
-  .snap { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; background: var(--line); flex-shrink: 0; }
-  .empty { text-align: center; color: var(--muted); padding: 30px 0; font-size: 15px; }
-
-  .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: 100%; text-align: right; font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 8px; cursor: pointer; box-shadow: var(--shadow); }
-  .row .sname { font-weight: 700; font-size: 17px; }
-  .row .scode { font-size: 13px; color: var(--muted); direction: ltr; text-align: right; }
-  .pill { font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
-  .pill.in { background: color-mix(in srgb, var(--in) 14%, transparent); color: var(--in); }
-  .pill.out { background: color-mix(in srgb, var(--out) 14%, transparent); color: var(--out); }
-  .pill.none { background: var(--line); color: var(--muted); }
-  .section { margin-top: 18px; }
-  .paid-state { font-size: 20px; font-weight: 800; margin-top: 6px; }
+:root{--bg:#F4F5FA;--card:#fff;--ink:#14162B;--muted:#6B7085;--line:#E5E7F0;--accent:#2563EB;--in:#16A34A;--out:#EA580C;--shadow:0 1px 2px rgba(20,22,43,.04),0 8px 24px rgba(20,22,43,.06);color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0E1020;--card:#171A2E;--ink:#EEF0FA;--muted:#9097B0;--line:#262A44;--accent:#60A5FA;--in:#4ADE80;--out:#FB923C;--shadow:none;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+body{font-family:Tajawal,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto;padding:24px 18px calc(96px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+h1{font-size:30px;font-weight:800}h2{font-size:18px;font-weight:800}
+.sub,.hello{color:var(--muted);font-size:14px}.name{font-size:24px;font-weight:800}
+.field{margin-top:14px}label{display:block;font-weight:600;margin-bottom:6px;font-size:14px;color:var(--muted)}
+input,select{width:100%;font:inherit;font-size:17px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;outline:0}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+.btn{width:100%;font:inherit;font-size:17px;font-weight:700;border:0;border-radius:18px;padding:16px;cursor:pointer;color:#fff;margin-top:14px;background:var(--accent)}
+.btn:active{transform:scale(.98)}.btn:disabled{opacity:.45}
+.in{background:var(--in)}.outb{background:var(--out)}
+.alt{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.link,.back,.sm{background:0;border:0;color:var(--accent);font:inherit;font-size:15px;font-weight:600;cursor:pointer;padding:8px}
+.sm.red{color:var(--out)}
+.error{color:var(--out);font-size:14px;margin-top:8px;min-height:20px}.msg{color:var(--in);font-size:14px;margin-top:8px;min-height:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.stat{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 6px;text-align:center;cursor:pointer}
+.stat b{display:block;font-size:26px;font-weight:800}.stat span{font-size:13px;color:var(--muted);font-weight:600}
+.stat.on{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}
+.row,.entry{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:right;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 15px;margin-top:8px}
+button.row{cursor:pointer}
+.sname{font-weight:700;font-size:16px}.scode{font-size:13px;color:var(--muted)}
+.pill{font-size:13px;font-weight:700;padding:5px 12px;border-radius:999px;white-space:nowrap;background:var(--line);color:var(--muted)}
+.pill.g{background:color-mix(in srgb,var(--in) 15%,transparent);color:var(--in)}
+.pill.o{background:color-mix(in srgb,var(--out) 15%,transparent);color:var(--out)}
+.pill.b{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+.kind{font-weight:700}.kind.in{color:var(--in);background:0}.kind.out{color:var(--out)}
+.dur{font-size:13px;color:var(--muted)}.warn{font-size:13px;color:var(--out);font-weight:600}.time{font-weight:600;direction:ltr}
+.snap{width:48px;height:48px;border-radius:14px;object-fit:cover;background:var(--line)}
+.empty{text-align:center;color:var(--muted);padding:26px 0}
+.tabs{position:fixed;inset:auto 0 0 0;z-index:10;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;background:0;border:0;font:inherit;font-size:12px;font-weight:700;color:var(--muted);padding:6px 0;cursor:pointer;border-radius:14px}
+.tabs button i{display:block;font-style:normal;font-size:22px}
+.tabs button.on{color:var(--accent)}
+.big{display:block;margin:34px auto 10px;width:210px;height:210px;border-radius:50%;border:0;font:inherit;font-size:30px;font-weight:800;color:#fff;background:var(--in);box-shadow:0 0 0 12px color-mix(in srgb,var(--in) 18%,transparent),0 16px 36px color-mix(in srgb,var(--in) 30%,transparent);cursor:pointer;transition:transform .1s}
+.big:active{transform:scale(.96)}.big.out{background:var(--out);box-shadow:0 0 0 12px color-mix(in srgb,var(--out) 18%,transparent),0 16px 36px color-mix(in srgb,var(--out) 30%,transparent)}.big:disabled{opacity:.5}
+.status{text-align:center;font-size:18px;font-weight:700;margin-top:14px}
+.ov{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto}
+.srow{display:flex;gap:8px;margin-top:10px}.srow select{flex:1.4}.srow input{flex:1}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <section id="loading">
-    <div class="hero" aria-hidden="true"><svg viewBox="0 0 120 120" width="76" height="76">
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2"/>
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2" transform="rotate(60 60 60)"/>
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2" transform="rotate(-60 60 60)"/>
-      <circle cx="60" cy="60" r="7" fill="var(--in)"/>
-      <circle cx="110" cy="60" r="4" fill="var(--out)"/></svg></div>
-    <p class="sub" style="text-align:center">جاري التحميل…</p>
-  </section>
+<section id="loading"><p class="sub" style="text-align:center;margin-top:40vh">جاري التحميل…</p></section>
 
-  <section id="login" class="hidden">
-    <div class="hero" aria-hidden="true"><svg viewBox="0 0 120 120" width="76" height="76">
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2"/>
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2" transform="rotate(60 60 60)"/>
-      <ellipse cx="60" cy="60" rx="50" ry="20" fill="none" stroke="var(--accent)" stroke-width="2" transform="rotate(-60 60 60)"/>
-      <circle cx="60" cy="60" r="7" fill="var(--in)"/>
-      <circle cx="110" cy="60" r="4" fill="var(--out)"/></svg></div>
-    <h1 style="text-align:center">حضور وانصراف</h1>
-    <p class="sub" style="text-align:center">حصة الفيزياء · سجّل حضورك وانصرافك بضغطة واحدة.</p>
+<section id="login" class="hidden">
+  <h1 style="text-align:center;margin-top:30px">حضور وانصراف</h1>
+  <p class="sub" style="text-align:center;margin-top:6px">حصة الفيزياء · سجّل حضورك وانصرافك بضغطة واحدة.</p>
+  <div id="sform">
+    <div class="field"><label>رقم الطالب</label><input id="code" inputmode="numeric" autocomplete="off"></div>
+    <div class="field"><label>الاسم</label><input id="fname" autocomplete="name" placeholder="اكتب اسمك كما كتبه المدرس"></div>
+    <p class="error" id="serr"></p>
+    <button class="btn" id="login-s">دخول</button>
+    <div style="text-align:center"><button class="link" id="to-t">دخول المدرس</button></div>
+  </div>
+  <div id="tform" class="hidden">
+    <div class="field"><label>الإيميل</label><input id="temail" inputmode="email" autocomplete="username"></div>
+    <div class="field"><label>كلمة السر</label><input id="tpass" type="password" autocomplete="current-password"></div>
+    <p class="error" id="terr"></p>
+    <button class="btn" id="login-t">دخول المدرس</button>
+    <div style="text-align:center"><button class="link" id="to-s">رجوع لدخول الطالب</button></div>
+  </div>
+</section>
 
-    <div id="student-form">
-      <div class="field"><label for="code">رقم الطالب</label>
-        <input id="code" inputmode="numeric" autocomplete="off" placeholder="مثال: 20231045"></div>
-      <div class="field"><label for="fname">الاسم</label>
-        <input id="fname" autocomplete="name" placeholder="اكتب اسمك كما كتبه المدرس"></div>
-      <p class="error" id="student-error"></p>
-      <button class="btn" id="login-student">دخول</button>
-      <div style="text-align:center"><button class="link" id="show-teacher">دخول المدرس</button></div>
-    </div>
+<!-- الطالب -->
+<section id="student" class="hidden">
+  <div class="panel" id="p-home">
+    <div class="top"><div><div class="hello" id="s-date"></div><div class="name" id="s-name"></div><div class="hello" id="s-group"></div></div>
+      <button class="sm" id="s-logout">خروج</button></div>
+    <button class="big" id="big">حضور</button>
+    <div class="status" id="s-status"></div>
+    <p class="msg" id="s-msg" style="text-align:center"></p>
+  </div>
+  <div class="panel hidden" id="p-log"><h2>السجل</h2><div id="s-log"></div></div>
+</section>
 
-    <div id="teacher-form" class="hidden">
-      <div class="field"><label for="temail">الإيميل</label>
-        <input id="temail" autocomplete="username" inputmode="email"></div>
-      <div class="field"><label for="tpass">كلمة السر</label>
-        <input id="tpass" type="password" autocomplete="current-password"></div>
-      <p class="error" id="teacher-error"></p>
-      <button class="btn" id="login-teacher">دخول المدرس</button>
-      <div style="text-align:center"><button class="link" id="show-student">رجوع لدخول الطالب</button></div>
-    </div>
-  </section>
+<!-- المدرس -->
+<section id="teacher" class="hidden">
+  <div class="panel" id="p-today">
+    <div class="top"><div><div class="hello">لوحة المدرس</div><div class="name" id="t-date"></div></div><button class="sm" id="t-logout">خروج</button></div>
+    <div class="stats" id="counters"></div>
+    <div id="clist"></div>
+  </div>
 
-  <section id="home" class="hidden">
-    <div class="top">
-      <div>
-        <div class="hello" id="s-date"></div>
-        <div class="name" id="s-name"></div>
-        <div class="hello" id="s-group" style="margin-top:4px"></div>
-      </div>
-      <button class="small-btn" id="s-logout">خروج</button>
-    </div>
+  <div class="panel hidden" id="p-abs">
+    <h2>تقرير الغياب والتأخير</h2>
+    <div class="field"><label>المجموعة</label><select id="r-group"></select></div>
+    <div class="field"><label>من</label><input id="r-from" type="date"></div>
+    <div class="field"><label>إلى</label><input id="r-to" type="date"></div>
+    <div id="rlist"></div>
+  </div>
 
-    <div class="card">
-      <div class="card-label">حالتك الآن</div>
-      <div class="card-value"><span class="dot" id="s-dot"></span><span id="s-status"></span></div>
-    </div>
+  <div class="panel hidden" id="p-stu">
+    <h2>الطلاب</h2>
+    <div class="field"><select id="f-group"></select></div>
+    <div class="field"><input id="search" placeholder="🔍 ابحث بالاسم أو الرقم"></div>
+    <div id="students"></div>
+  </div>
 
-    <button class="btn btn-in" id="in-btn">تسجيل حضور</button>
-    <button class="btn btn-out hidden" id="out-btn">تسجيل انصراف</button>
-    <p class="error" id="s-msg"></p>
-
-    <div class="list-head"><h2>السجل</h2><span id="s-count"></span></div>
-    <div id="s-log"></div>
-  </section>
-
-  <section id="teacher" class="hidden">
-    <div class="top">
-      <div>
-        <div class="hello">لوحة المدرس</div>
-        <div class="name" id="t-date"></div>
-      </div>
-      <button class="small-btn" id="t-logout">خروج</button>
-    </div>
-
-    <div class="card section">
-      <div class="card-label">مكان المدرسة</div>
-      <div class="field" style="margin-top:12px"><label for="school-radius">المسافة المسموحة (بالمتر)</label>
-        <input id="school-radius" inputmode="numeric" value="30"></div>
-      <button class="btn btn-alt" id="set-school" style="color:var(--ink)">تحديد مكان المدرسة من موبايلي</button>
-      <p class="msg" id="school-msg"></p>
-    </div>
-
-    <div class="card section">
-      <div class="card-label">إضافة طالب للمجموعة المختارة</div>
-      <div class="field" style="margin-top:12px"><input id="add-code" inputmode="numeric" autocomplete="off" placeholder="رقم الطالب"></div>
-      <div class="field" style="margin-top:10px"><input id="add-name" autocomplete="off" placeholder="اسم الطالب الكامل"></div>
-      <div class="field" style="margin-top:10px"><input id="add-guardian" inputmode="tel" autocomplete="off" placeholder="رقم ولي الأمر"></div>
-      <button class="btn btn-in" id="add-btn">إضافة الطالب</button>
-      <p class="error" id="add-error"></p>
-    </div>
-
-    <div class="card section">
-      <div class="card-label">تصدير الحضور CSV</div>
-      <div class="field" style="margin-top:12px"><label for="exp-from">من تاريخ</label><input id="exp-from" type="date"></div>
-      <div class="field" style="margin-top:10px"><label for="exp-to">إلى تاريخ</label><input id="exp-to" type="date"></div>
-      <button class="btn btn-alt" id="export-btn" style="color:var(--ink)">تصدير</button>
-    </div>
-
-    <div id="groups-list" style="margin-top:24px"></div>
-
-    <div id="group-view" class="hidden">
-      <button class="back" id="group-back">← رجوع للمجموعات</button>
-      <div class="name" id="group-title" style="margin-top:6px"></div>
-      <div class="stats">
-        <div class="stat"><b id="n-in">0</b><span>حاضر</span></div>
-        <div class="stat"><b id="n-out">0</b><span>انصرف</span></div>
-        <div class="stat"><b id="n-none">0</b><span>لم يسجّل</span></div>
-      </div>
-      <div class="list-head"><h2>الطلاب</h2><span id="n-total"></span></div>
-      <div class="field" style="margin-top:12px"><input id="search" autocomplete="off" placeholder="🔍 ابحث بالاسم أو الرقم"></div>
-      <div id="students" style="margin-top:12px"></div>
-
-      <div id="detail" class="hidden" style="margin-top:12px">
-        <button class="back" id="back-btn">← رجوع للقائمة</button>
-        <div class="hello" id="d-code" style="margin-top:8px"></div>
-        <div class="name" id="d-name"></div>
-
-        <div class="card">
-          <div class="field" style="margin-top:0"><label for="d-name-in">اسم الطالب</label><input id="d-name-in"></div>
-          <button class="btn btn-alt" id="name-save" style="color:var(--ink)">حفظ الاسم</button>
-          <div class="field" style="margin-top:16px"><label for="d-group">المجموعة</label><select id="d-group"></select></div>
-          <button class="btn btn-alt" id="group-save" style="color:var(--ink)">حفظ المجموعة</button>
-          <p class="msg" id="d-msg"></p>
-        </div>
-
-        <div class="card">
-          <div class="card-label">رقم ولي الأمر</div>
-          <div class="field" style="margin-top:8px"><input id="d-guardian-in" inputmode="tel" autocomplete="off"></div>
-          <button class="btn btn-in" id="guardian-save">حفظ رقم ولي الأمر</button>
-          <button class="btn btn-alt" id="wa-btn" style="color:var(--ink)">💬 مراسلة ولي الأمر على واتساب</button>
-          <div class="card-label" style="margin-top:18px">الشهر الأول</div>
-          <div class="paid-state" id="d-paid">—</div>
-          <button class="btn btn-alt" id="paid-btn" style="color:var(--ink)">تغيير حالة الدفع</button>
-        </div>
-
-        <button class="btn btn-alt" id="unbind-btn" style="color:var(--ink)">فك ربط الحساب (لو غيّر موبايله)</button>
-        <p class="error" id="unbind-msg"></p>
-
-        <div class="list-head"><h2>السجل</h2></div>
-        <div id="d-log" style="margin-top:8px"></div>
-        <button class="btn btn-out" id="del-student">حذف الطالب</button>
-      </div>
-    </div>
-  </section>
-
+  <div class="panel hidden" id="p-set">
+    <h2>الإعدادات</h2>
+    <div class="card"><b>مواعيد الحصص</b><p class="sub">اختار اليوم والساعة لكل مجموعة.</p><div id="sched"></div>
+      <button class="btn" id="sched-save">حفظ المواعيد</button><p class="msg" id="sched-msg"></p></div>
+    <div class="card"><b>مكان المدرسة</b>
+      <div class="field"><label>المسافة المسموحة (متر)</label><input id="radius" inputmode="numeric" value="30"></div>
+      <button class="btn alt" id="set-school">تحديد مكان المدرسة من موبايلي</button><p class="msg" id="school-msg"></p></div>
+    <div class="card"><b>إضافة طالب</b>
+      <div class="field"><select id="a-group"></select></div>
+      <div class="field"><input id="a-code" inputmode="numeric" placeholder="رقم الطالب"></div>
+      <div class="field"><input id="a-name" placeholder="اسم الطالب الكامل"></div>
+      <div class="field"><input id="a-guard" inputmode="tel" placeholder="رقم ولي الأمر"></div>
+      <button class="btn in" id="add-btn">إضافة الطالب</button><p class="error" id="a-err"></p></div>
+    <div class="card"><b>تصدير الحضور CSV</b>
+      <div class="field"><label>من</label><input id="e-from" type="date"></div>
+      <div class="field"><label>إلى</label><input id="e-to" type="date"></div>
+      <button class="btn alt" id="export">تصدير</button></div>
+  </div>
+</section>
 </div>
 
+<!-- تفاصيل الطالب -->
+<div class="ov hidden" id="ov"><div class="wrap">
+  <button class="back" id="ov-back">← رجوع</button>
+  <div class="hello" id="d-code"></div><div class="name" id="d-name"></div>
+  <div class="card">
+    <div class="field" style="margin-top:0"><label>الاسم</label><input id="d-name-in"></div>
+    <button class="btn alt" id="d-name-save">حفظ الاسم</button>
+    <div class="field"><label>المجموعة</label><select id="d-group"></select></div>
+    <button class="btn alt" id="d-group-save">حفظ المجموعة</button>
+    <div class="field"><label>رقم ولي الأمر</label><input id="d-guard" inputmode="tel"></div>
+    <button class="btn alt" id="d-guard-save">حفظ الرقم</button>
+    <button class="btn alt" id="d-wa">💬 واتساب لولي الأمر</button>
+    <p class="msg" id="d-msg"></p>
+  </div>
+  <div class="card"><div class="hello">الشهر الأول</div><div class="name" id="d-paid"></div>
+    <button class="btn alt" id="d-paid-btn">تغيير حالة الدفع</button></div>
+  <div class="card"><b>تسجيل يدوي</b>
+    <button class="btn in" id="m-in">تسجيل حضور الآن</button>
+    <button class="btn outb" id="m-out">تسجيل انصراف الآن</button></div>
+  <button class="btn alt" id="d-unbind">فك ربط الحساب (لو غيّر موبايله)</button>
+  <div style="margin-top:22px"><h2>السجل</h2><div id="d-log"></div></div>
+  <button class="btn outb" id="d-del">حذف الطالب</button>
+</div></div>
+
+<nav class="tabs hidden" id="stabs">
+  <button class="on" data-p="p-home"><i>🏠</i>الرئيسية</button>
+  <button data-p="p-log"><i>🕘</i>السجل</button>
+</nav>
+<nav class="tabs hidden" id="ttabs">
+  <button class="on" data-p="p-today"><i>📅</i>اليوم</button>
+  <button data-p="p-abs"><i>🚫</i>الغياب</button>
+  <button data-p="p-stu"><i>👥</i>الطلاب</button>
+  <button data-p="p-set"><i>⚙️</i>الإعدادات</button>
+</nav>
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassword, signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInAnonymously,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getFirestore,doc,getDoc,getDocs,setDoc,updateDoc,deleteDoc,addDoc,collection,query,where,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAXfBTspoxshk1PHViFon4gfORbFP3S7mA",
-    authDomain: "attendance-school-2a84d.firebaseapp.com",
-    projectId: "attendance-school-2a84d",
-    storageBucket: "attendance-school-2a84d.firebasestorage.app",
-    messagingSenderId: "347934096437",
-    appId: "1:347934096437:web:f4b34dc18b814b4b64857c"
-  };
+const app=initializeApp({apiKey:"AIzaSyAXfBTspoxshk1PHViFon4gfORbFP3S7mA",authDomain:"attendance-school-2a84d.firebaseapp.com",projectId:"attendance-school-2a84d",storageBucket:"attendance-school-2a84d.firebasestorage.app",messagingSenderId:"347934096437",appId:"1:347934096437:web:f4b34dc18b814b4b64857c"});
+const auth=getAuth(app),db=getFirestore(app);
+const TEACHER="tttb58393@gmail.com",GROUPS=["أولى ثانوي","تانية ثانوي","تالتة ثانوي"],SK="attendance-student-code";
+const DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],DAY_ORDER=[6,0,1,2,3,4,5];
+const LATE_MS=10*60000,WINDOW_DAYS=45;
+const $=id=>document.getElementById(id),norm=s=>String(s||"").replace(/\s+/g," ").trim();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const AR_DATE=new Intl.DateTimeFormat("ar-EG",{weekday:"long",day:"numeric",month:"long"});
+const AR_TIME=new Intl.DateTimeFormat("ar-EG",{hour:"2-digit",minute:"2-digit",hour12:true});
+const dk=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+const p2=n=>String(n).padStart(2,"0"),ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+const toRec=d=>{const x=d.data({serverTimestamps:"estimate"});return{...x,id:d.id,ts:x.ts.toMillis()}};
+const legacy=s=>(s.records||[]).map(r=>({...r,code:s.id,legacy:true}));
+function distM(a,b){const R=6371000,t=Math.PI/180,dl=(b.lat-a.lat)*t,dn=(b.lng-a.lng)*t;const x=Math.sin(dl/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dn/2)**2;return Math.round(2*R*Math.asin(Math.sqrt(x)))}
+function getLoc(){return new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r({lat:+p.coords.latitude.toFixed(5),lng:+p.coords.longitude.toFixed(5),acc:Math.round(p.coords.accuracy)}),()=>r(null),{enableHighAccuracy:true,timeout:8000,maximumAge:60000})})}
+async function getPhoto(){let st=null;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});const v=document.createElement("video");v.playsInline=true;v.muted=true;v.srcObject=st;await v.play();await new Promise(r=>setTimeout(r,400));const z=Math.min(v.videoWidth,v.videoHeight);if(!z)return null;const c=document.createElement("canvas");c.width=c.height=240;c.getContext("2d").drawImage(v,(v.videoWidth-z)/2,(v.videoHeight-z)/2,z,z,0,0,240,240);return c.toDataURL("image/jpeg",.6)}catch{return null}finally{st&&st.getTracks().forEach(t=>t.stop())}}
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+function show(id){["loading","login","student","teacher"].forEach(s=>$(s).classList.toggle("hidden",s!==id));$("stabs").classList.toggle("hidden",id!=="student");$("ttabs").classList.toggle("hidden",id!=="teacher")}
+function fillGroups(sel,cur,all){sel.innerHTML=(all?'<option value="">كل المجموعات</option>':"")+GROUPS.map(g=>`<option>${g}</option>`).join("");sel.value=cur||(all?"":GROUPS[0])}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{const nav=b.parentElement;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));const sec=nav.id==="stabs"?$("student"):$("teacher");sec.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden",p.id!==b.dataset.p));if(b.dataset.p==="p-abs")renderReport()}));
 
-  const TEACHER_EMAIL = "tttb58393@gmail.com";
-  const GROUPS = ["أولى ثانوي", "تانية ثانوي", "تالتة ثانوي"];
-  const NONE = "__none__";
-  const SESSION_KEY = "attendance-student-code";
+function logHTML(recs,T){
+  return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${r.photoId?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>';
+}
+function loadThumbs(box){box.querySelectorAll("img[data-p]").forEach(i=>getDoc(doc(db,"students",i.dataset.c,"photos",i.dataset.p)).then(s=>{if(s.exists())i.src=s.data().img}).catch(()=>{}))}
 
-  const $ = (id) => document.getElementById(id);
-  const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
-  const AR_DATE = new Intl.DateTimeFormat("ar-EG", { weekday: "long", day: "numeric", month: "long" });
-  const AR_TIME = new Intl.DateTimeFormat("ar-EG", { hour: "2-digit", minute: "2-digit", hour12: true });
-  const dayKey = (ts) => { const d = new Date(ts); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
-  const fmtDur = (ms) => {
-    const m = Math.round(ms / 60000), h = Math.floor(m / 60), mm = m % 60;
-    if (h === 0) return mm + " دقيقة";
-    return h + " ساعة" + (mm ? " و" + mm + " دقيقة" : "");
-  };
-  function distM(a, b) {
-    const R = 6371000, t = Math.PI / 180;
-    const dLat = (b.lat - a.lat) * t, dLng = (b.lng - a.lng) * t;
-    const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * t) * Math.cos(b.lat * t) * Math.sin(dLng / 2) ** 2;
-    return Math.round(2 * R * Math.asin(Math.sqrt(x)));
-  }
-  function show(id) {
-    ["loading", "login", "home", "teacher"].forEach((s) => $(s).classList.toggle("hidden", s !== id));
-  }
-  function fillGroups(sel, current, withAll) {
-    sel.innerHTML = "";
-    sel.appendChild(new Option(withAll ? "كل المجموعات" : "اختار المجموعة", ""));
-    GROUPS.forEach((g) => sel.appendChild(new Option(g, g)));
-    sel.value = current || "";
-  }
-  function getLoc() {
-    return new Promise((resolve) => {
-      if (!navigator.geolocation) return resolve(null);
-      navigator.geolocation.getCurrentPosition(
-        (p) => resolve({ lat: +p.coords.latitude.toFixed(5), lng: +p.coords.longitude.toFixed(5), acc: Math.round(p.coords.accuracy) }),
-        () => resolve(null),
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-      );
-    });
-  }
-  async function getPhoto() {
-    let stream = null;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-      const video = document.createElement("video");
-      video.playsInline = true; video.muted = true; video.srcObject = stream;
-      await video.play();
-      await new Promise((r) => setTimeout(r, 400));
-      const size = Math.min(video.videoWidth, video.videoHeight);
-      if (!size) return null;
-      const c = document.createElement("canvas");
-      c.width = 240; c.height = 240;
-      c.getContext("2d").drawImage(video, (video.videoWidth - size) / 2, (video.videoHeight - size) / 2, size, size, 0, 0, 240, 240);
-      return c.toDataURL("image/jpeg", 0.6);
-    } catch { return null; }
-    finally { if (stream) stream.getTracks().forEach((t) => t.stop()); }
-  }
+/* ===== الطالب ===== */
+let me=null,myAtt=[],unsubMine=null;
+const lastToday=recs=>{const k=dk(Date.now());const t=recs.filter(r=>dk(r.ts)===k).sort((a,b)=>a.ts-b.ts);return t[t.length-1]||null};
+function renderStudent(){
+  const all=myAtt.concat(me.legacy),last=lastToday(all),inside=last&&last.type==="in";
+  $("s-date").textContent=AR_DATE.format(Date.now());$("s-name").textContent=me.name;$("s-group").textContent="المجموعة: "+(me.group||"غير محددة");
+  $("big").textContent=inside?"انصراف":"حضور";$("big").classList.toggle("out",!!inside);
+  $("s-status").textContent=!last?"لم تسجّل حضور اليوم":inside?"حاضر منذ "+AR_TIME.format(last.ts):"انصرفت الساعة "+AR_TIME.format(last.ts);
+  $("s-log").innerHTML=logHTML(all,false);
+}
+$("big").addEventListener("click",async()=>{
+  const last=lastToday(myAtt.concat(me.legacy)),type=last&&last.type==="in"?"out":"in",b=$("big");
+  b.disabled=true;$("s-msg").style.color="";$("s-msg").textContent="بنحدد موقعك وبنصوّرك…";
+  const[loc,photo]=await Promise.all([getLoc(),getPhoto()]);
+  let school=null;try{const sn=await getDoc(doc(db,"settings","school"));school=sn.exists()?sn.data():null}catch{}
+  const dist=loc&&school&&school.lat!=null?distM(loc,school):null,out=dist!==null&&dist>(school.radius||30);
+  let photoId=null;
+  if(photo){const id=String(Date.now());try{await setDoc(doc(db,"students",me.code,"photos",id),{img:photo});photoId=id}catch{}}
+  try{
+    await addDoc(collection(db,"att"),{code:me.code,uid:auth.currentUser.uid,type,ts:serverTimestamp(),loc,out,dist,method:"tap",photoId});
+    navigator.vibrate&&navigator.vibrate([60,40,60]);
+    $("s-msg").textContent="✓ تم تسجيل "+(type==="in"?"الحضور":"الانصراف")+(out?" (خارج المدرسة)":"");
+  }catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما قدرناش نحفظ التسجيل. جرّب تاني."}
+  b.disabled=false;
+});
+$("s-logout").addEventListener("click",()=>{localStorage.removeItem(SK);unsubMine&&unsubMine();unsubMine=null;me=null;$("code").value=$("fname").value="";show("login")});
+async function enterStudent(code,uid){
+  const ref=doc(db,"students",code),snap=await getDoc(ref);
+  if(!snap.exists())return{error:"الرقم ده مش مسجّل عند المدرس."};
+  const d=snap.data();
+  if(d.lock&&d.lock!==uid)return{error:"الرقم ده مربوط بحساب تاني. كلّم المدرس."};
+  if(!d.lock)await updateDoc(ref,{lock:uid});
+  me={code,name:d.name,group:d.group||"",legacy:legacy({id:code,records:d.records})};
+  localStorage.setItem(SK,code);show("student");renderStudent();
+  unsubMine&&unsubMine();
+  unsubMine=onSnapshot(query(collection(db,"att"),where("uid","==",uid)),sn=>{myAtt=sn.docs.map(toRec).filter(r=>r.code===code);renderStudent();loadThumbs($("s-log"))});
+  return{ok:true};
+}
+$("login-s").addEventListener("click",async()=>{
+  const code=$("code").value.trim(),name=norm($("fname").value);$("serr").textContent="";
+  if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("serr").textContent="اكتب رقم الطالب والاسم.";return}
+  try{
+    if(!auth.currentUser)await signInAnonymously(auth);
+    const sn=await getDoc(doc(db,"students",code));
+    if(sn.exists()&&norm(sn.data().name)!==name){$("serr").textContent="الاسم مش مطابق للي سجّله المدرس.";return}
+    const r=await enterStudent(code,auth.currentUser.uid);if(r.error)$("serr").textContent=r.error;
+  }catch{$("serr").textContent="في مشكلة في الاتصال. جرّب تاني."}
+});
+$("to-t").addEventListener("click",()=>{$("sform").classList.add("hidden");$("tform").classList.remove("hidden");$("temail").value=TEACHER});
+$("to-s").addEventListener("click",()=>{$("tform").classList.add("hidden");$("sform").classList.remove("hidden")});
+$("login-t").addEventListener("click",async()=>{$("terr").textContent="";try{await signInWithEmailAndPassword(auth,$("temail").value.trim(),$("tpass").value);$("tpass").value=""}catch{$("terr").textContent="الإيميل أو كلمة السر غلط."}});
 
-  function renderLog(container, records, countEl, opts = {}) {
-    const { teacher = false, code = "", onDel = null } = opts;
-    container.innerHTML = "";
-    const recs = [...records].sort((a, b) => b.ts - a.ts);
-    if (countEl) countEl.textContent = recs.length ? recs.length + " تسجيل" : "";
-    if (!recs.length) { container.innerHTML = '<div class="empty">لا توجد تسجيلات بعد</div>'; return; }
+/* ===== المدرس ===== */
+let students=[],att=[],sched={},priv={},detail=null,selKey="",started=false;
+const recsOf=s=>att.filter(r=>r.code===s.id).concat(legacy(s));
 
-    const groups = {};
-    recs.forEach((r) => (groups[dayKey(r.ts)] ||= []).push(r));
-    Object.values(groups).forEach((list) => {
-      const day = document.createElement("div");
-      day.className = "day";
-      const title = document.createElement("div");
-      title.className = "day-title";
-      title.textContent = AR_DATE.format(list[0].ts);
-      day.appendChild(title);
-
-      const asc = [...list].reverse();
-      const dur = {};
-      let open = null;
-      asc.forEach((r) => {
-        if (r.type === "in") open = r;
-        else if (open) { dur[r.ts] = r.ts - open.ts; open = null; }
-      });
-
-      list.forEach((r) => {
-        const e = document.createElement("div");
-        e.className = "entry";
-
-        if (teacher && r.photo) {
-          const img = document.createElement("img");
-          img.className = "snap"; img.alt = "";
-          e.appendChild(img);
-          getDoc(doc(db, "students", code, "photos", String(r.ts)))
-            .then((s) => { if (s.exists()) img.src = s.data().img; })
-            .catch(() => {});
-        }
-
-        const left = document.createElement("div");
-        const kind = document.createElement("div");
-        kind.className = "kind " + r.type;
-        kind.textContent = r.type === "in" ? "حضور" : "انصراف";
-        left.appendChild(kind);
-
-        if (r.type === "out" && dur[r.ts] != null) {
-          const d = document.createElement("div");
-          d.className = "dur";
-          d.textContent = "مدة الحضور: " + fmtDur(dur[r.ts]);
-          left.appendChild(d);
-        }
-        if (r.out) {
-          const w = document.createElement("div");
-          w.className = "warn";
-          w.textContent = "خارج المدرسة" + (r.dist != null ? " (" + r.dist + " متر)" : "");
-          left.appendChild(w);
-        }
-        if (teacher && r.loc) {
-          const a = document.createElement("a");
-          a.href = "https://maps.google.com/?q=" + r.loc.lat + "," + r.loc.lng;
-          a.target = "_blank"; a.rel = "noopener";
-          a.textContent = "📍 الموقع (دقة " + r.loc.acc + " متر)";
-          left.appendChild(a);
-        }
-        e.appendChild(left);
-
-        const t = document.createElement("div");
-        t.className = "time";
-        t.textContent = AR_TIME.format(r.ts);
-        e.appendChild(t);
-
-        if (onDel) {
-          const del = document.createElement("button");
-          del.className = "small-btn";
-          del.style.color = "var(--out)";
-          del.textContent = "حذف";
-          del.addEventListener("click", () => onDel(r.ts));
-          e.appendChild(del);
-        }
-        day.appendChild(e);
-      });
-      container.appendChild(day);
-    });
-  }
-
-  let me = null;
-  let writeChain = Promise.resolve();
-
-  function todayRecs(records) {
-    const k = dayKey(Date.now());
-    return records.filter((r) => dayKey(r.ts) === k).sort((a, b) => a.ts - b.ts);
-  }
-  function lastToday(records) {
-    const t = todayRecs(records);
-    return t[t.length - 1] || null;
-  }
-
-  function renderStudent() {
-    $("s-date").textContent = AR_DATE.format(Date.now());
-    $("s-name").textContent = me.name;
-    $("s-group").textContent = "المجموعة: " + (me.group || "مش متحدد");
-    const last = lastToday(me.records);
-    const inside = !!last && last.type === "in";
-    $("s-dot").className = "dot" + (inside ? " in" : last ? " out" : "");
-    $("s-status").textContent = !last ? "لم تسجّل حضور اليوم"
-      : inside ? "حاضر منذ " + AR_TIME.format(last.ts)
-      : "انصرفت الساعة " + AR_TIME.format(last.ts);
-    $("in-btn").classList.toggle("hidden", inside);
-    $("out-btn").classList.toggle("hidden", !inside);
-    renderLog($("s-log"), me.records, $("s-count"));
-  }
-
-  function saveMe() {
-    writeChain = writeChain.then(async () => {
-      try {
-        await updateDoc(doc(db, "students", me.code), { records: me.records });
-        return true;
-      } catch {
-        $("s-msg").textContent = "ما قدرناش نحفظ التسجيل. جرّب تاني.";
-        return false;
-      }
-    });
-    return writeChain;
-  }
-
-  async function record(type) {
-    $("s-msg").textContent = "";
-    const last = lastToday(me.records);
-    if (type === "in" && last && last.type === "in") { $("s-msg").textContent = "أنت مسجّل حضور بالفعل."; return; }
-    if (type === "out" && (!last || last.type !== "in")) { $("s-msg").textContent = "لازم تسجّل حضورك الأول."; return; }
-
-    const ts = Date.now();
-    $("in-btn").disabled = true; $("out-btn").disabled = true;
-    $("s-msg").textContent = "بنحدد موقعك وبنصوّرك…";
-    const [loc, photo] = await Promise.all([getLoc(), getPhoto()]);
-
-    let school = null;
-    try {
-      const sn = await getDoc(doc(db, "settings", "school"));
-      school = sn.exists() ? sn.data() : null;
-    } catch { school = null; }
-    const dist = loc && school && school.lat != null ? distM(loc, school) : null;
-    const out = dist !== null && dist > (school.radius || 30);
-
-    let photoSaved = false;
-    if (photo) {
-      try {
-        await setDoc(doc(db, "students", me.code, "photos", String(ts)), { img: photo });
-        photoSaved = true;
-      } catch {
-        photoSaved = false;
-      }
-    }
-
-    me.records.push({ type, ts, loc, photo: photoSaved, out, dist });
-    renderStudent();
-    const ok = await saveMe();
-    $("in-btn").disabled = false; $("out-btn").disabled = false;
-
-    const parts = [];
-    if (!loc) parts.push("الموقع");
-    if (!photo) parts.push("الصورة");
-    else if (!photoSaved) parts.push("حفظ الصورة");
-    if (out) parts.push("أنت بعيد عن المدرسة (" + dist + " متر)، التسجيل اتحفظ كخارج المدرسة");
-    if (ok) $("s-msg").textContent = parts.length ? "ما قدرناش نحدد " + parts.join(" ولا ") + "." : "";
-  }
-
-  $("in-btn").addEventListener("click", () => record("in"));
-  $("out-btn").addEventListener("click", () => record("out"));
-  $("s-logout").addEventListener("click", () => {
-    localStorage.removeItem(SESSION_KEY);
-    me = null;
-    $("code").value = ""; $("fname").value = "";
-    $("student-error").textContent = "";
-    show("login");
-    $("student-form").classList.remove("hidden");
-    $("teacher-form").classList.add("hidden");
-  });
-
-  async function enterStudent(code, uid) {
-    const ref = doc(db, "students", code);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return { error: "الرقم ده مش مسجّل عند المدرس. كلّم المدرس يضيفك." };
-    const d = snap.data();
-    if (d.lock && d.lock !== uid) return { error: "الرقم ده مربوط بحساب تاني. كلّم المدرس." };
-    if (!d.lock) await updateDoc(ref, { lock: uid });
-    me = { code, name: d.name, group: d.group || "", records: d.records || [] };
-    localStorage.setItem(SESSION_KEY, code);
-    show("home");
-    renderStudent();
-    return { ok: true };
-  }
-
-  $("login-student").addEventListener("click", async () => {
-    const code = $("code").value.trim();
-    const name = norm($("fname").value);
-    $("student-error").textContent = "";
-    if (!/^[A-Za-z0-9]+$/.test(code) || !name) { $("student-error").textContent = "اكتب رقم الطالب والاسم."; return; }
-    try {
-      if (!auth.currentUser) await signInAnonymously(auth);
-      const uid = auth.currentUser.uid;
-      const snap = await getDoc(doc(db, "students", code));
-      if (snap.exists() && norm(snap.data().name) !== name) {
-        $("student-error").textContent = "الاسم مش مطابق للي المدرس سجله. اكتبه زي ما هو.";
-        return;
-      }
-      const res = await enterStudent(code, uid);
-      if (res.error) $("student-error").textContent = res.error;
-    } catch {
-      $("student-error").textContent = "في مشكلة في الاتصال. جرّب تاني.";
+function sessStart(g,date){
+  const s=(sched[g]||[]).filter(x=>x.d===date.getDay()).sort((a,b)=>a.h*60+a.m-b.h*60-b.m)[0];
+  if(!s)return null;const t=new Date(date);t.setHours(s.h,s.m,0,0);return t.getTime();
+}
+/* يرجع قائمة: absent / late / forgot */
+function report(from,to,group){
+  const res=[],now=Date.now(),today=dk(now);
+  students.filter(s=>!group||s.group===group).forEach(s=>{
+    const recs=recsOf(s).sort((a,b)=>a.ts-b.ts);
+    for(const d=new Date(from);d<=to;d.setDate(d.getDate()+1)){
+      if(s.created&&d.getTime()+864e5<s.created)continue;
+      const k=dk(d.getTime()),day=recs.filter(r=>dk(r.ts)===k),st=sessStart(s.group,d),first=day.find(r=>r.type==="in");
+      if(st&&st<now&&!first)res.push({s,d:new Date(d),t:"absent"});
+      else if(first&&st&&first.ts>st+LATE_MS)res.push({s,d:new Date(d),t:"late"});
+      if(day.length&&day[day.length-1].type==="in"&&k!==today)res.push({s,d:new Date(d),t:"forgot"});
     }
   });
+  return res;
+}
+const midnight=(off=0)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+off);return d};
 
-  $("show-teacher").addEventListener("click", () => {
-    $("student-form").classList.add("hidden");
-    $("teacher-form").classList.remove("hidden");
-    $("temail").value = TEACHER_EMAIL;
-  });
-  $("show-student").addEventListener("click", () => {
-    $("teacher-form").classList.add("hidden");
-    $("student-form").classList.remove("hidden");
-  });
-  $("login-teacher").addEventListener("click", async () => {
-    $("teacher-error").textContent = "";
-    try {
-      await signInWithEmailAndPassword(auth, $("temail").value.trim(), $("tpass").value);
-      $("tpass").value = "";
-    } catch {
-      $("teacher-error").textContent = "الإيميل أو كلمة السر غلط.";
-    }
-  });
+function renderToday(){
+  $("t-date").textContent=AR_DATE.format(Date.now());
+  const k=dk(Date.now()),rep=report(midnight(),midnight(),""),old=report(midnight(-WINDOW_DAYS),midnight(-1),"").filter(x=>x.t==="forgot");
+  const lists={present:[],late:rep.filter(x=>x.t==="late").map(x=>x.s.name),absent:rep.filter(x=>x.t==="absent").map(x=>x.s.name),
+    forgot:old.map(x=>x.s.name+" — "+AR_DATE.format(x.d)),outside:[]};
+  students.forEach(s=>{const day=recsOf(s).filter(r=>dk(r.ts)===k);if(day.some(r=>r.type==="in"))lists.present.push(s.name);if(day.some(r=>r.out))lists.outside.push(s.name)});
+  const defs=[["present","حاضر"],["late","متأخر"],["absent","غايب"],["forgot","نسي ينصرف"],["outside","من خارج المدرسة"]];
+  $("counters").innerHTML=defs.map(([key,l])=>`<button class="stat${selKey===key?" on":""}" data-k="${key}"><b>${lists[key].length}</b><span>${l}</span></button>`).join("");
+  $("clist").innerHTML=selKey?(lists[selKey].map(n=>`<div class="row"><span class="sname">${esc(n)}</span></div>`).join("")||'<div class="empty">لا أحد</div>'):'<div class="empty">اضغط على أي عدّاد لتشوف الأسماء</div>';
+  $("counters").onclick=e=>{const b=e.target.closest("[data-k]");if(b){selKey=selKey===b.dataset.k?"":b.dataset.k;renderToday()}};
+}
 
-  let students = [];
-  let currentGroup = "";
-  let detail = null;
-  let privInfo = {};
-  let unsubStudents = null;
+function waLink(num,text){let n=String(num||"").replace(/\D/g,"");if(!n)return"";if(n.startsWith("00"))n=n.slice(2);else if(n.startsWith("0"))n="20"+n.slice(1);return"https://wa.me/"+n+"?text="+encodeURIComponent(text)}
+function renderReport(){
+  const g=$("r-group").value,from=new Date($("r-from").value+"T00:00:00"),to=new Date($("r-to").value+"T00:00:00");
+  if(isNaN(from)||isNaN(to)){$("rlist").innerHTML="";return}
+  const L={absent:["غايب","o","تغيّب عن"],late:["متأخر","b","تأخّر عن"],forgot:["نسي ينصرف","o","نسي تسجيل الانصراف في"]};
+  const rows=report(from,to,g).sort((a,b)=>b.d-a.d||a.s.name.localeCompare(b.s.name,"ar"));
+  $("rlist").innerHTML=rows.map(x=>{
+    const[l,c,v]=L[x.t],txt="السلام عليكم، الطالب "+x.s.name+" "+v+" حصة الفيزياء يوم "+AR_DATE.format(x.d)+".",href=waLink((priv[x.s.id]||{}).guardian,txt);
+    return`<div class="row"><div><div class="sname">${esc(x.s.name)}</div><div class="scode">${AR_DATE.format(x.d)}</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill ${c}">${l}</span>${href?`<a href="${href}" target="_blank" rel="noopener" style="font-size:22px;text-decoration:none">💬</a>`:""}</div></div>`}).join("")||'<div class="empty">لا يوجد غياب أو تأخير في الفترة دي 👌</div>';
+}
+["r-group","r-from","r-to"].forEach(i=>$(i).addEventListener("change",renderReport));
 
-  function studentStatus(s) {
-    const last = lastToday(s.records || []);
-    if (!last) return { cls: "none", text: "لم يسجّل" };
-    return last.type === "in" ? { cls: "in", text: "حاضر" } : { cls: "out", text: "انصرف" };
-  }
-  function inGroup(s, g) {
-    return g === NONE ? !GROUPS.includes(s.group) : s.group === g;
-  }
+function renderStudents(){
+  const g=$("f-group").value,q=norm($("search").value).toLowerCase(),k=dk(Date.now());
+  const list=students.filter(s=>(!g||s.group===g)&&(!q||norm(s.name).toLowerCase().includes(q)||s.id.toLowerCase().includes(q))).sort((a,b)=>norm(a.name).localeCompare(norm(b.name),"ar"));
+  $("students").innerHTML=list.map(s=>{const day=recsOf(s).filter(r=>dk(r.ts)===k).sort((a,b)=>a.ts-b.ts),l=day[day.length-1],st=!l?["لم يسجّل",""]:l.type==="in"?["حاضر","g"]:["انصرف","o"];
+    return`<button class="row" data-id="${esc(s.id)}"><div><div class="sname">${esc(s.name)}</div><div class="scode">${esc(s.id)} · ${esc(s.group||"بدون مجموعة")}</div></div><span class="pill ${st[1]}">${st[0]}</span></button>`}).join("")||'<div class="empty">لا يوجد طلاب</div>';
+}
+$("students").addEventListener("click",e=>{const b=e.target.closest("[data-id]");if(b)openDetail(b.dataset.id)});
+["f-group","search"].forEach(i=>$(i).addEventListener("input",renderStudents));
 
-  function renderGroups() {
-    const box = $("groups-list");
-    box.innerHTML = "";
-    const keys = GROUPS.concat(students.some((s) => !GROUPS.includes(s.group)) ? [NONE] : []);
-    keys.forEach((g) => {
-      const count = students.filter((s) => inGroup(s, g)).length;
-      const btn = document.createElement("button");
-      btn.className = "row";
-      const left = document.createElement("div");
-      const n = document.createElement("div");
-      n.className = "sname";
-      n.textContent = g === NONE ? "بدون مجموعة" : g;
-      const c = document.createElement("div");
-      c.className = "scode";
-      c.textContent = count + " طالب";
-      left.appendChild(n); left.appendChild(c);
-      btn.appendChild(left);
-      btn.addEventListener("click", () => { currentGroup = g; showGroup(); });
-      box.appendChild(btn);
-    });
-  }
+function openDetail(id){
+  const s=students.find(x=>x.id===id);if(!s)return;detail=s;
+  $("ov").classList.remove("hidden");$("d-code").textContent=s.id;$("d-name").textContent=s.name;$("d-name-in").value=s.name;
+  fillGroups($("d-group"),s.group,false);$("d-guard").value=(priv[id]||{}).guardian||"";$("d-paid").textContent=(priv[id]||{}).paid?"دفع":"لم يدفع بعد";$("d-msg").textContent="";
+  renderDetailLog();
+}
+function renderDetailLog(){if(!detail)return;$("d-log").innerHTML=logHTML(recsOf(detail),true);loadThumbs($("d-log"))}
+$("ov-back").addEventListener("click",()=>{detail=null;$("ov").classList.add("hidden")});
+const say=t=>$("d-msg").textContent=t;
+$("d-name-save").addEventListener("click",async()=>{const v=norm($("d-name-in").value);if(!v)return;try{await updateDoc(doc(db,"students",detail.id),{name:v});$("d-name").textContent=v;say("تم حفظ الاسم.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-group-save").addEventListener("click",async()=>{try{await updateDoc(doc(db,"students",detail.id),{group:$("d-group").value});say("تم حفظ المجموعة.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-guard-save").addEventListener("click",async()=>{try{const v=norm($("d-guard").value);await setDoc(doc(db,"private",detail.id),{guardian:v},{merge:true});(priv[detail.id]||(priv[detail.id]={})).guardian=v;say("تم حفظ الرقم.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-wa").addEventListener("click",()=>{const h=waLink($("d-guard").value,"السلام عليكم، بخصوص الطالب "+detail.name+" في حصة الفيزياء: ");if(!h)return say("اكتب رقم ولي الأمر الأول.");window.open(h,"_blank","noopener")});
+$("d-paid-btn").addEventListener("click",async()=>{const n=!(priv[detail.id]||{}).paid;try{await setDoc(doc(db,"private",detail.id),{paid:n},{merge:true});(priv[detail.id]||(priv[detail.id]={})).paid=n;$("d-paid").textContent=n?"دفع":"لم يدفع بعد"}catch{say("ما قدرناش نغيّر.")}});
+$("d-unbind").addEventListener("click",async()=>{try{await updateDoc(doc(db,"students",detail.id),{lock:"",credId:""});say("تم فك الربط.")}catch{say("ما قدرناش نفك الربط.")}});
+["in","out"].forEach(t=>$("m-"+t).addEventListener("click",async()=>{try{await addDoc(collection(db,"att"),{code:detail.id,uid:auth.currentUser.uid,type:t,ts:serverTimestamp(),loc:null,out:false,dist:null,method:"manual",photoId:null});say("تم التسجيل.")}catch{say("ما قدرناش نسجّل.")}}));
+$("d-log").addEventListener("click",async e=>{const id=e.target.dataset.del;if(!id||!confirm("تحذف التسجيل ده؟"))return;
+  try{if(id[0]==="L"){const ts=+id.slice(1);await updateDoc(doc(db,"students",detail.id),{records:(detail.records||[]).filter(r=>r.ts!==ts)})}else await deleteDoc(doc(db,"att",id))}catch{say("ما قدرناش نحذف.")}});
+$("d-del").addEventListener("click",async()=>{if(!confirm("تحذف الطالب وكل بياناته؟"))return;try{const id=detail.id;await deleteDoc(doc(db,"students",id));await deleteDoc(doc(db,"private",id)).catch(()=>{});detail=null;$("ov").classList.add("hidden")}catch{say("ما قدرناش نحذف.")}});
 
-  function showGroup() {
-    $("groups-list").classList.add("hidden");
-    $("group-view").classList.remove("hidden");
-    $("group-title").textContent = currentGroup === NONE ? "بدون مجموعة" : currentGroup;
-    $("detail").classList.add("hidden");
-    $("students").classList.remove("hidden");
-    $("search").value = "";
-    renderTeacher();
-  }
+/* الإعدادات */
+function renderSched(){
+  $("sched").innerHTML=GROUPS.map((g,gi)=>`<div style="margin-top:16px"><div class="sname">${g}</div>`+(sched[g]||[]).map((x,i)=>`<div class="srow"><select data-g="${gi}" data-i="${i}" data-f="d">${DAY_ORDER.map(d=>`<option value="${d}"${d===x.d?" selected":""}>${DAYS[d]}</option>`).join("")}</select><input type="time" data-g="${gi}" data-i="${i}" data-f="t" value="${p2(x.h)}:${p2(x.m)}"><button class="sm red" data-rm="${gi},${i}">✕</button></div>`).join("")+`<button class="sm" data-add="${gi}">+ إضافة حصة</button></div>`).join("");
+}
+$("sched").addEventListener("change",e=>{const t=e.target,g=GROUPS[t.dataset.g],x=(sched[g]||[])[t.dataset.i];if(!x)return;if(t.dataset.f==="d")x.d=+t.value;else{const[h,m]=t.value.split(":");x.h=+h;x.m=+m}});
+$("sched").addEventListener("click",e=>{const t=e.target;if(t.dataset.add!=null){const g=GROUPS[t.dataset.add];(sched[g]||(sched[g]=[])).push({d:6,h:16,m:0});renderSched()}
+  if(t.dataset.rm){const[gi,i]=t.dataset.rm.split(",");sched[GROUPS[gi]].splice(+i,1);renderSched()}});
+$("sched-save").addEventListener("click",async()=>{try{await setDoc(doc(db,"settings","schedule"),sched);$("sched-msg").textContent="تم حفظ المواعيد.";renderToday()}catch{$("sched-msg").textContent="ما قدرناش نحفظ."}});
+$("set-school").addEventListener("click",async()=>{$("school-msg").textContent="بنحدد مكانك…";const l=await getLoc();if(!l){$("school-msg").textContent="ما قدرناش نحدد مكانك.";return}const r=+$("radius").value||30;try{await setDoc(doc(db,"settings","school"),{lat:l.lat,lng:l.lng,radius:r});$("school-msg").textContent="تم الحفظ (نطاق "+r+" متر)."}catch{$("school-msg").textContent="ما قدرناش نحفظ."}});
+$("add-btn").addEventListener("click",async()=>{
+  const code=$("a-code").value.trim(),name=norm($("a-name").value);$("a-err").style.color="";$("a-err").textContent="";
+  if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("a-err").textContent="اكتب رقم الطالب واسمه.";return}
+  try{const ref=doc(db,"students",code);if((await getDoc(ref)).exists()){$("a-err").textContent="الرقم ده مضاف قبل كده.";return}
+    await setDoc(ref,{code,name,group:$("a-group").value,lock:"",records:[],created:Date.now()});
+    await setDoc(doc(db,"private",code),{guardian:norm($("a-guard").value),paid:false});
+    $("a-code").value=$("a-name").value=$("a-guard").value="";$("a-err").style.color="var(--in)";$("a-err").textContent="تمت الإضافة."}catch{$("a-err").textContent="ما قدرناش نضيف الطالب."}
+});
+$("export").addEventListener("click",()=>{
+  const f=$("e-from").value?new Date($("e-from").value).getTime():-Infinity,t=$("e-to").value?new Date($("e-to").value).getTime()+864e5:Infinity;
+  const rows=[["الكود","الاسم","المجموعة","الوقت","النوع","خارج المدرسة"]];
+  students.forEach(s=>recsOf(s).filter(r=>r.ts>=f&&r.ts<t).forEach(r=>rows.push([s.id,s.name,s.group||"",new Date(r.ts).toLocaleString("ar-EG"),r.type==="in"?"حضور":"انصراف",r.out?"نعم":""])));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv;charset=utf-8"}));a.download="attendance.csv";document.body.appendChild(a);a.click();a.remove();
+});
+$("t-logout").addEventListener("click",()=>signOut(auth));
 
-  $("group-back").addEventListener("click", () => {
-    currentGroup = "";
-    $("group-view").classList.add("hidden");
-    $("groups-list").classList.remove("hidden");
-    renderGroups();
-  });
-
-  $("search").addEventListener("input", () => renderTeacher());
-
-  function renderTeacher() {
-    $("t-date").textContent = AR_DATE.format(Date.now());
-    renderGroups();
-    if (!currentGroup) return;
-
-    const q = norm($("search").value).toLowerCase();
-    const list = students.filter((s) => inGroup(s, currentGroup))
-      .sort((a, b) => norm(a.name).localeCompare(norm(b.name), "ar"));
-    let nIn = 0, nOut = 0, nNone = 0, shown = 0;
-    const box = $("students");
-    box.innerHTML = "";
-    list.forEach((s) => {
-      const st = studentStatus(s);
-      if (st.cls === "in") nIn++; else if (st.cls === "out") nOut++; else nNone++;
-      if (q && !(norm(s.name).toLowerCase().includes(q) || String(s.code || s.id).toLowerCase().includes(q))) return;
-      shown++;
-      const btn = document.createElement("button");
-      btn.className = "row";
-      const left = document.createElement("div");
-      const n = document.createElement("div");
-      n.className = "sname"; n.textContent = s.name || "بدون اسم";
-      const c = document.createElement("div");
-      c.className = "scode"; c.textContent = s.code || s.id;
-      left.appendChild(n); left.appendChild(c);
-      const pill = document.createElement("span");
-      pill.className = "pill " + st.cls;
-      pill.textContent = st.text;
-      btn.appendChild(left); btn.appendChild(pill);
-      btn.addEventListener("click", () => openDetail(s.id));
-      box.appendChild(btn);
-    });
-    if (!list.length) box.innerHTML = '<div class="empty">ما فيه طلاب في المجموعة دي</div>';
-    else if (!shown) box.innerHTML = '<div class="empty">مفيش نتائج للبحث ده</div>';
-    $("n-in").textContent = nIn;
-    $("n-out").textContent = nOut;
-    $("n-none").textContent = nNone;
-    $("n-total").textContent = list.length ? list.length + " طالب" : "";
-  }
-
-  function paintPaid(paid) {
-    $("d-paid").textContent = paid ? "دفع" : "لم يدفع بعد";
-  }
-
-  async function openDetail(code) {
-    const s = students.find((x) => x.id === code);
-    if (!s) return;
-    detail = s;
-    $("students").classList.add("hidden");
-    $("detail").classList.remove("hidden");
-    $("d-code").textContent = s.code || s.id;
-    $("d-name").textContent = s.name || "بدون اسم";
-    $("d-name-in").value = s.name || "";
-    fillGroups($("d-group"), s.group, false);
-    $("d-msg").textContent = "";
-    $("unbind-msg").textContent = "";
-
-    try {
-      const pr = await getDoc(doc(db, "private", s.id));
-      privInfo = pr.exists() ? (pr.data() || {}) : {};
-    } catch { privInfo = {}; }
-    $("d-guardian-in").value = privInfo.guardian || "";
-    paintPaid(!!privInfo.paid);
-    renderLog($("d-log"), s.records || [], null, {
-      teacher: true,
-      code: s.id,
-      onDel: deleteRecord
-    });
-  }
-
-  $("back-btn").addEventListener("click", () => {
-    detail = null;
-    $("detail").classList.add("hidden");
-    $("students").classList.remove("hidden");
-  });
-
-  async function deleteRecord(ts) {
-    if (!detail) return;
-    if (!confirm("تحذف التسجيل ده؟")) return;
-    const left = (detail.records || []).filter((r) => r.ts !== ts);
-    try {
-      await updateDoc(doc(db, "students", detail.id), { records: left });
-      detail.records = left;
-      openDetail(detail.id);
-    } catch {
-      $("d-msg").textContent = "ما قدرناش نحذف التسجيل. جرّب تاني.";
-    }
-  }
-
-  $("name-save").addEventListener("click", async () => {
-    const v = norm($("d-name-in").value);
-    if (!v || !detail) { $("d-msg").textContent = "اكتب الاسم."; return; }
-    try {
-      await updateDoc(doc(db, "students", detail.id), { name: v });
-      $("d-name").textContent = v;
-      $("d-msg").textContent = "تم حفظ الاسم.";
-    } catch { $("d-msg").textContent = "ما قدرناش نحفظ الاسم."; }
-  });
-
-  $("group-save").addEventListener("click", async () => {
-    if (!detail) return;
-    try {
-      await updateDoc(doc(db, "students", detail.id), { group: $("d-group").value });
-      $("d-msg").textContent = "تم حفظ المجموعة.";
-    } catch { $("d-msg").textContent = "ما قدرناش نحفظ المجموعة."; }
-  });
-
-  $("guardian-save").addEventListener("click", async () => {
-    if (!detail) return;
-    try {
-      await setDoc(doc(db, "private", detail.id), { guardian: norm($("d-guardian-in").value) }, { merge: true });
-      $("d-msg").textContent = "تم حفظ رقم ولي الأمر.";
-    } catch { $("d-msg").textContent = "ما قدرناش نحفظ الرقم."; }
-  });
-
-  $("wa-btn").addEventListener("click", () => {
-    let n = $("d-guardian-in").value.replace(/\D/g, "");
-    if (!n) { $("d-msg").textContent = "اكتب رقم ولي الأمر الأول."; return; }
-    if (n.startsWith("00")) n = n.slice(2);
-    else if (n.startsWith("0")) n = "20" + n.slice(1);
-    const msg = "السلام عليكم، بخصوص الطالب " + $("d-name").textContent + " في حصة الفيزياء: ";
-    window.open("https://wa.me/" + n + "?text=" + encodeURIComponent(msg), "_blank", "noopener");
-  });
-
-  $("paid-btn").addEventListener("click", async () => {
-    if (!detail) return;
-    const next = !privInfo.paid;
-    try {
-      await setDoc(doc(db, "private", detail.id), { paid: next }, { merge: true });
-      privInfo.paid = next;
-      paintPaid(next);
-    } catch { $("d-msg").textContent = "ما قدرناش نغيّر حالة الدفع."; }
-  });
-
-  $("unbind-btn").addEventListener("click", async () => {
-    if (!detail) return;
-    try {
-      await updateDoc(doc(db, "students", detail.id), { lock: "" });
-      $("unbind-msg").textContent = "تم فك الربط. الطالب يدخل من حسابه الجديد.";
-    } catch { $("unbind-msg").textContent = "ما قدرناش نفك الربط."; }
-  });
-
-  $("del-student").addEventListener("click", async () => {
-    if (!detail) return;
-    if (!confirm("متأكد إنك عايز تحذف الطالب وكل تسجيلاته؟")) return;
-    try {
-      await deleteDoc(doc(db, "students", detail.id));
-      await deleteDoc(doc(db, "private", detail.id)).catch(() => {});
-      detail = null;
-      $("detail").classList.add("hidden");
-      $("students").classList.remove("hidden");
-    } catch { $("d-msg").textContent = "ما قدرناش نحذف الطالب."; }
-  });
-
-  $("add-btn").addEventListener("click", async () => {
-    const code = $("add-code").value.trim();
-    const name = norm($("add-name").value);
-    $("add-error").textContent = "";
-    if (currentGroup === NONE || !currentGroup) { $("add-error").textContent = "ادخل على مجموعة من الكروت الأول."; return; }
-    if (!/^[A-Za-z0-9]+$/.test(code) || !name) { $("add-error").textContent = "اكتب رقم الطالب (أرقام بس) واسمه."; return; }
-    try {
-      const ref = doc(db, "students", code);
-      if ((await getDoc(ref)).exists()) { $("add-error").textContent = "الرقم ده مضاف قبل كده."; return; }
-      await setDoc(ref, { code, name, group: currentGroup, lock: "", records: [] });
-      await setDoc(doc(db, "private", code), { guardian: norm($("add-guardian").value), paid: false });
-      $("add-code").value = ""; $("add-name").value = ""; $("add-guardian").value = "";
-      $("add-error").textContent = "تمت إضافة الطالب.";
-    } catch { $("add-error").textContent = "ما قدرناش نضيف الطالب. جرّب تاني."; }
-  });
-
-  $("set-school").addEventListener("click", async () => {
-    $("school-msg").textContent = "بنحدد مكانك…";
-    const loc = await getLoc();
-    if (!loc) { $("school-msg").textContent = "ما قدرناش نحدد مكانك. افتح الصفحة وإنت في المدرسة."; return; }
-    const radius = Number($("school-radius").value) || 30;
-    try {
-      await setDoc(doc(db, "settings", "school"), { lat: loc.lat, lng: loc.lng, radius });
-      $("school-msg").textContent = "تم حفظ مكان المدرسة (نطاق " + radius + " متر).";
-    } catch { $("school-msg").textContent = "ما قدرناش نحفظ المكان."; }
-  });
-
-  $("export-btn").addEventListener("click", () => {
-    const from = $("exp-from").value ? new Date($("exp-from").value).getTime() : -Infinity;
-    const to = $("exp-to").value ? new Date($("exp-to").value).getTime() + 86400000 : Infinity;
-    const rows = [["الكود", "الاسم", "المجموعة", "الوقت", "النوع", "خارج المدرسة", "الموقع"]];
-    students.forEach((s) => (s.records || []).filter((r) => r.ts >= from && r.ts < to).forEach((r) => rows.push([
-      s.code || s.id, s.name || "", s.group || "",
-      new Date(r.ts).toLocaleString("ar-EG"),
-      r.type === "in" ? "حضور" : "انصراف",
-      r.out ? "نعم" : "",
-      r.loc ? r.loc.lat + "," + r.loc.lng : ""
-    ])));
-    const csv = rows.map((r) => r.map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
-    a.download = "attendance.csv";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  });
-
-  $("t-logout").addEventListener("click", () => signOut(auth));
-
-  function startTeacher() {
-    show("teacher");
-    fillGroups($("d-group"), "", false);
-    currentGroup = "";
-    $("group-view").classList.add("hidden");
-    $("groups-list").classList.remove("hidden");
-    if (!unsubStudents) {
-      unsubStudents = onSnapshot(collection(db, "students"), (snap) => {
-        students = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        renderTeacher();
-        if (detail) {
-          const fresh = students.find((x) => x.id === detail.id);
-          if (fresh) detail = fresh;
-        }
-      });
-    }
-  }
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user && !user.isAnonymous && user.email === TEACHER_EMAIL) {
-      startTeacher();
-      return;
-    }
-    if (user && !user.isAnonymous) {
-      await signOut(auth);
-      show("login");
-      return;
-    }
-    if (user && user.isAnonymous) {
-      const code = localStorage.getItem(SESSION_KEY);
-      if (code) {
-        try {
-          const res = await enterStudent(code, user.uid);
-          if (res.ok) return;
-        } catch {}
-      }
-    }
-    show("login");
-  });
+function renderAll(){renderToday();renderStudents();renderDetailLog()}
+function startTeacher(){
+  show("teacher");if(started)return;started=true;
+  fillGroups($("r-group"),"",true);fillGroups($("f-group"),"",true);fillGroups($("a-group"),"",false);
+  $("r-to").value=ymd(midnight());$("r-from").value=ymd(midnight(-7));$("e-to").value=ymd(midnight());$("e-from").value=ymd(midnight(-30));
+  onSnapshot(collection(db,"students"),sn=>{students=sn.docs.map(d=>({id:d.id,...d.data()}));if(detail)detail=students.find(x=>x.id===detail.id)||detail;renderAll()});
+  onSnapshot(query(collection(db,"att"),where("ts",">=",new Date(Date.now()-WINDOW_DAYS*864e5))),sn=>{att=sn.docs.map(toRec);renderAll()});
+  onSnapshot(doc(db,"settings","schedule"),sn=>{sched=sn.exists()?sn.data():{};renderSched();renderAll()});
+  getDocs(collection(db,"private")).then(sn=>{sn.forEach(d=>priv[d.id]=d.data())}).catch(()=>{});
+}
+onAuthStateChanged(auth,async u=>{
+  if(u&&!u.isAnonymous&&u.email===TEACHER)return startTeacher();
+  if(u&&!u.isAnonymous){await signOut(auth);return show("login")}
+  if(u&&u.isAnonymous){const c=localStorage.getItem(SK);if(c){try{if((await enterStudent(c,u.uid)).ok)return}catch{}}}
+  show("login");
+});
 </script>
 </body>
 </html>
