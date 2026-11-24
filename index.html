@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563EB">
+<link rel="manifest" href="hp-manifest.json">
+<link rel="apple-touch-icon" href="hp-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="حضور بلس">
+<title>حضور وانصراف</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5FC;--card:#FFFFFF;--ink:#18213D;
+  --muted:#7B849F;--line:#E8EBF5;--accent:#315FEA;
+  --in:#16A875;--out:#F07843;
+  --shadow:0 8px 28px rgba(35,55,110,.07);
+  color-scheme:light;
+}
+@media(prefers-color-scheme:dark){
+:root{
+  --bg:#101426;--card:#1A2138;--ink:#F1F4FF;
+  --muted:#A0AAC5;--line:#2B3553;--accent:#7795FF;
+  --in:#40C99A;--out:#FF9A69;
+  --shadow:0 8px 28px rgba(0,0,0,.18);
+  color-scheme:dark;
+}}
+*{box-sizing:border-box;margin:0}
+body{
+  font-family:Tajawal,system-ui,sans-serif;
+  background:radial-gradient(ellipse at 90% 0%,rgba(83,112,255,.09),transparent 35%),var(--bg);
+  color:var(--ink);min-height:100dvh;line-height:1.6;
+  -webkit-font-smoothing:antialiased;letter-spacing:.05px;
+}
+.wrap{max-width:560px;margin:0 auto;padding:22px 17px calc(105px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+h1{font-size:32px;font-weight:800;letter-spacing:-.7px}
+h2{font-size:20px;font-weight:800;letter-spacing:-.3px}
+.sub,.hello{color:var(--muted);font-size:14px;line-height:1.8}
+.name{font-size:25px;font-weight:800;letter-spacing:-.4px}
+.field{margin-top:14px}
+label{display:block;font-weight:700;margin-bottom:7px;font-size:14px;color:var(--muted)}
+input,select{
+  width:100%;font:inherit;font-size:16px;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);
+  border-radius:17px;padding:15px 16px;min-height:54px;outline:0;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 13%,transparent);
+}
+.btn{
+  width:100%;font:inherit;font-size:17px;font-weight:800;
+  border:0;border-radius:17px;padding:15px;min-height:54px;
+  cursor:pointer;color:#fff;margin-top:14px;background:var(--accent);
+  box-shadow:0 5px 13px color-mix(in srgb,var(--accent) 17%,transparent);
+  transition:transform .18s ease,filter .18s ease;
+}
+.btn:active{transform:scale(.975);filter:brightness(.96)}
+.btn:disabled{opacity:.45}
+.in{background:var(--in)}
+.outb{background:var(--out)}
+.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.link,.back,.sm{background:0;border:0;color:var(--accent);font:inherit;font-size:15px;font-weight:700;cursor:pointer;padding:8px}
+.sm.red{color:var(--out)}
+.error{color:var(--out);font-size:14px;margin-top:8px;min-height:20px}
+.msg{color:var(--in);font-size:14px;margin-top:8px;min-height:20px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:5px 2px}
+.card{
+  margin-top:16px;background:var(--card);border:1px solid var(--line);
+  border-radius:25px;padding:20px;box-shadow:var(--shadow);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:20px}
+.stat{
+  font:inherit;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:21px;
+  padding:15px 5px;min-height:100px;text-align:center;cursor:pointer;
+  box-shadow:var(--shadow);transition:transform .18s,border-color .18s;
+}
+.stat:active{transform:scale(.97)}
+.stat b{display:block;font-size:28px;font-weight:800;color:var(--accent)}
+.stat span{display:block;margin-top:3px;font-size:13px;color:var(--muted);font-weight:700}
+.stat.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--card))}
+.row,.entry{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  width:100%;text-align:right;font:inherit;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:13px 15px;margin-top:10px;
+  min-height:66px;box-shadow:0 3px 12px rgba(30,45,90,.035);
+}
+button.row{cursor:pointer}
+.sname{font-weight:800;font-size:16px;line-height:1.7}
+.scode{font-size:13px;color:var(--muted)}
+.pill{font-size:13px;font-weight:800;padding:6px 12px;border-radius:12px;white-space:nowrap;background:var(--line);color:var(--muted)}
+.pill.g{background:color-mix(in srgb,var(--in) 15%,transparent);color:var(--in)}
+.pill.o{background:color-mix(in srgb,var(--out) 15%,transparent);color:var(--out)}
+.pill.b{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+.kind{font-weight:800}
+.kind.in{color:var(--in);background:0}
+.kind.out{color:var(--out)}
+.dur{font-size:13px;color:var(--muted)}
+.warn{font-size:13px;color:var(--out);font-weight:700}
+.time{font-weight:700;direction:ltr}
+.snap{width:48px;height:48px;border-radius:15px;object-fit:cover;background:var(--line);border:2px solid var(--line)}
+.empty{text-align:center;color:var(--muted);padding:32px 12px;line-height:2}
+.tabs{
+  position:fixed;inset:auto 0 0 0;z-index:10;display:flex;
+  background:color-mix(in srgb,var(--card) 94%,transparent);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);
+  box-shadow:0 -5px 25px rgba(25,40,90,.06);
+  padding:9px 7px calc(9px + env(safe-area-inset-bottom));
+}
+.tabs button{
+  flex:1;background:0;border:0;font:inherit;font-size:12px;
+  font-weight:800;color:var(--muted);padding:6px 0;cursor:pointer;
+  border-radius:16px;min-height:55px;transition:background .2s,color .2s;
+}
+.tabs button i{display:block;font-style:normal;font-size:23px;margin-bottom:2px}
+.tabs button.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.big{
+  display:block;margin:42px auto 18px;width:205px;height:205px;
+  border-radius:50%;border:8px solid color-mix(in srgb,var(--card) 75%,transparent);
+  outline:1px solid color-mix(in srgb,var(--in) 25%,transparent);
+  font:inherit;font-size:29px;font-weight:800;color:#fff;background:var(--in);
+  box-shadow:0 12px 30px color-mix(in srgb,var(--in) 24%,transparent),
+  0 0 0 10px color-mix(in srgb,var(--in) 9%,transparent);
+  cursor:pointer;transition:transform .2s ease,background .2s ease;
+}
+.big:active{transform:scale(.96)}
+.big.out{
+  background:var(--out);
+  outline-color:color-mix(in srgb,var(--out) 25%,transparent);
+  box-shadow:0 12px 30px color-mix(in srgb,var(--out) 24%,transparent),
+  0 0 0 10px color-mix(in srgb,var(--out) 9%,transparent);
+}
+.big:disabled{opacity:.5}
+.status{text-align:center;font-size:18px;font-weight:800;margin-top:14px;line-height:1.9}
+.ov{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;animation:screenIn .22s ease}
+.srow{display:flex;gap:8px;margin-top:10px}
+.srow select{flex:1.4}
+.srow input{flex:1}
+@keyframes screenIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(min-width:480px){.wrap{padding-left:22px;padding-right:22px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ===== Full visual redesign: light blue / white ===== */
+:root{
+  --bg:#F2F7FF; --card:#FFFFFF; --ink:#183153; --muted:#7185A5;
+  --line:#E2EBF8; --accent:#3478F6; --in:#16A879; --out:#F07843;
+  --shadow:0 14px 34px rgba(42,91,165,.10);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{background:#F2F7FF;scroll-behavior:smooth}
+body{
+  background:
+    radial-gradient(ellipse at 100% 0%,rgba(52,120,246,.15),transparent 34%),
+    radial-gradient(ellipse at 0% 42%,rgba(113,177,255,.10),transparent 30%),
+    linear-gradient(180deg,#F8FBFF 0%,#EFF5FF 100%);
+  color:var(--ink);font-family:Tajawal,system-ui,sans-serif;
+  min-height:100dvh;line-height:1.65;-webkit-font-smoothing:antialiased;
+}
+.wrap{width:min(100%,680px);margin:0 auto;padding:24px 18px calc(112px + env(safe-area-inset-bottom))}
+h1{font-size:clamp(29px,7vw,38px);line-height:1.25;font-weight:800;letter-spacing:-.8px;color:#17365F}
+h2{font-size:22px;font-weight:800;color:#1B3B66;margin-bottom:14px}
+.sub,.hello{color:var(--muted);font-size:14px;line-height:1.9}
+.name{font-size:25px;font-weight:800;letter-spacing:-.4px;color:#17365F}
+.hidden{display:none!important}
+
+/* Login screen */
+#login{position:relative;max-width:480px;margin:5vh auto 0;padding:30px 23px 25px;background:rgba(255,255,255,.94);
+ border:1px solid #E3EDFC;border-radius:30px;box-shadow:0 22px 55px rgba(44,91,160,.13);overflow:hidden}
+#login:before{content:"";display:block;width:76px;height:76px;border-radius:24px;margin:0 auto 18px;
+ background:linear-gradient(145deg,#5D9BFF,#2867E8);box-shadow:0 10px 22px rgba(52,120,246,.25)}
+#login:after{content:"✓";position:absolute;top:36px;left:50%;transform:translateX(-50%);color:white;font-size:37px;font-weight:800}
+#login h1{margin-top:0!important;text-align:center}
+#login>.sub{margin:8px 0 25px!important;text-align:center}
+#sform,#tform{background:#F7FAFF;border:1px solid #E8F0FC;border-radius:22px;padding:17px}
+.field{margin-top:15px}
+label{display:block;font-weight:800;margin:0 2px 8px;font-size:14px;color:#58708F}
+input,select{
+ width:100%;font:inherit;font-size:16px;color:var(--ink);background:#fff;
+ border:1.5px solid #DFE9F7;border-radius:15px;padding:14px 16px;min-height:54px;outline:0;
+ box-shadow:0 2px 5px rgba(35,75,130,.025);transition:border-color .2s,box-shadow .2s,background .2s
+}
+input::placeholder{color:#A3B2C8}
+input:focus,select:focus{border-color:#6B9FFF;box-shadow:0 0 0 4px rgba(52,120,246,.12);background:#fff}
+.btn{
+ width:100%;font:inherit;font-size:17px;font-weight:800;border:0;border-radius:15px;
+ padding:14px 17px;min-height:54px;cursor:pointer;color:#fff;margin-top:14px;
+ background:linear-gradient(135deg,#4B8BFF,#2868E8);
+ box-shadow:0 8px 17px rgba(52,120,246,.22);transition:transform .18s,filter .18s
+}
+.btn:active{transform:translateY(1px) scale(.985);filter:brightness(.97)}
+.btn:disabled{opacity:.48}
+.in{background:linear-gradient(135deg,#20BF91,#119B70)}
+.outb{background:linear-gradient(135deg,#FF9A68,#EC7045)}
+.alt{background:#F4F8FF;color:#326DCB;border:1px solid #DCE8FA;box-shadow:none}
+.link,.back,.sm{background:transparent;border:0;color:#3478F6;font:inherit;font-size:15px;font-weight:800;cursor:pointer;padding:9px}
+.error{color:#E46C4B;font-size:14px;margin-top:8px;min-height:20px}
+.msg{color:#159B70;font-size:14px;margin-top:8px;min-height:20px}
+
+/* Main screens and content cards */
+.panel{animation:panelEnter .24s ease both}
+@keyframes panelEnter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.top{
+ display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:17px 18px;background:rgba(255,255,255,.88);border:1px solid #E4EDFA;
+ border-radius:23px;box-shadow:0 8px 22px rgba(44,91,160,.07);margin-bottom:18px
+}
+.top .name{font-size:23px}
+.top .sm{background:#F0F6FF;border:1px solid #E0EBFA;border-radius:12px;padding:8px 13px}
+.card{
+ margin-top:15px;background:#fff;border:1px solid #E3ECF9;border-radius:23px;
+ padding:19px;box-shadow:0 9px 24px rgba(44,91,160,.07)
+}
+#p-abs,#p-stu,#p-set,#p-log{
+ background:rgba(255,255,255,.88);border:1px solid #E4EDFA;border-radius:25px;
+ padding:20px 17px;box-shadow:var(--shadow)
+}
+#p-abs h2,#p-stu h2,#p-set h2,#p-log h2{padding-bottom:12px;border-bottom:1px solid #EAF0F9}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+.stat{
+ font:inherit;color:var(--ink);background:#fff;border:1px solid #E3ECF9;border-radius:20px;
+ padding:16px 10px;min-height:105px;text-align:center;cursor:pointer;
+ box-shadow:0 7px 17px rgba(44,91,160,.06);transition:transform .18s,border-color .18s,background .18s
+}
+.stat:active{transform:scale(.975)}
+.stat b{display:block;font-size:30px;font-weight:800;color:#3478F6;line-height:1.3}
+.stat span{display:block;margin-top:5px;font-size:13px;color:#6F83A2;font-weight:800}
+.stat.on{border:2px solid #5B93F7;background:#F0F6FF;padding:15px 9px}
+.row,.entry{
+ display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;
+ text-align:right;font:inherit;color:var(--ink);background:#fff;border:1px solid #E4ECF8;
+ border-radius:17px;padding:13px 14px;margin-top:10px;min-height:66px;
+ box-shadow:0 4px 12px rgba(36,76,130,.045)
+}
+button.row{cursor:pointer;transition:border-color .18s,transform .18s}
+button.row:active{transform:scale(.99);border-color:#8EB5F8}
+.sname{font-weight:800;font-size:16px;line-height:1.7}
+.scode{font-size:13px;color:#8293AD}
+.pill{font-size:12px;font-weight:800;padding:6px 11px;border-radius:11px;white-space:nowrap;background:#EDF2F9;color:#71839C}
+.pill.g{background:#E5F8F1;color:#13966C}
+.pill.o{background:#FFF0E9;color:#E8754D}
+.pill.b{background:#EAF2FF;color:#3478F6}
+.kind{font-weight:800}
+.empty{text-align:center;color:#8A9AB2;padding:30px 12px;line-height:2;background:#F7FAFF;border:1px dashed #DCE7F5;border-radius:17px;margin-top:13px}
+.snap{width:50px;height:50px;border-radius:15px;object-fit:cover;background:#EDF3FC;border:2px solid #E0EAF8}
+.time{font-weight:800;direction:ltr;color:#456487}
+.dur,.warn{font-size:13px}
+.warn{color:#E8754D;font-weight:800}
+
+/* Student attendance action */
+#p-home{background:rgba(255,255,255,.9);border:1px solid #E4EDFA;border-radius:27px;padding:16px;box-shadow:var(--shadow)}
+.big{
+ display:block;margin:40px auto 20px;width:min(58vw,220px);height:min(58vw,220px);
+ border-radius:50%;border:10px solid #fff;outline:1px solid #CDE0FA;
+ font:inherit;font-size:30px;font-weight:800;color:#fff;
+ background:linear-gradient(145deg,#29C99A,#109D75);
+ box-shadow:0 14px 30px rgba(22,168,121,.23),0 0 0 12px rgba(52,120,246,.07);
+ cursor:pointer;transition:transform .2s,background .2s
+}
+.big:active{transform:scale(.96)}
+.big.out{background:linear-gradient(145deg,#FFA06D,#EB7045);outline-color:#F8D9CA;
+ box-shadow:0 14px 30px rgba(240,120,67,.22),0 0 0 12px rgba(240,120,67,.08)}
+.big:disabled{opacity:.55}
+.status{text-align:center;font-size:17px;font-weight:800;margin:15px auto 5px;line-height:1.9;color:#345477;max-width:330px}
+
+/* Bottom navigation */
+.tabs{
+ position:fixed;inset:auto 0 0 0;z-index:10;display:flex;gap:5px;
+ background:rgba(255,255,255,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+ border-top:1px solid #E1EAF7;box-shadow:0 -8px 26px rgba(31,66,120,.08);
+ padding:9px 8px calc(9px + env(safe-area-inset-bottom))
+}
+.tabs button{
+ flex:1;background:transparent;border:0;font:inherit;font-size:12px;font-weight:800;
+ color:#8293AD;padding:7px 2px;cursor:pointer;border-radius:15px;min-height:57px;
+ transition:background .2s,color .2s
+}
+.tabs button i{display:block;font-style:normal;font-size:22px;margin-bottom:2px}
+.tabs button.on{color:#3478F6;background:#EDF4FF}
+.ov{position:fixed;inset:0;z-index:30;background:#F2F7FF;overflow:auto;animation:panelEnter .22s ease}
+.ov .wrap{max-width:680px}
+.srow{display:flex;gap:9px;margin-top:10px}
+.srow select{flex:1.4}.srow input{flex:1}
+@media(min-width:560px){
+ .wrap{padding-left:24px;padding-right:24px}
+ .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #login{margin-top:7vh;padding:34px 28px 28px}
+}
+@media(max-width:360px){
+ .wrap{padding-left:12px;padding-right:12px}
+ .card{padding:15px}
+ .stat{min-height:94px}
+ .stat b{font-size:26px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+</style>
+<style>
+/* ===== Reference-style redesign (blue hero card, white action button, floating navy nav) ===== */
+:root{--accent:#2563EB;--ink:#0F1E3D;--muted:#6B7C99;--line:#E4EBF6;--navy:#0B1B3A;--cyan:#22D3EE;--in:#16A34A;--out:#DC2626}
+body{background:radial-gradient(ellipse at 100% 0%,rgba(37,99,235,.10),transparent 38%),#F4F7FD}
+.wrap{width:min(100%,520px);padding:calc(18px + env(safe-area-inset-top)) 18px calc(120px + env(safe-area-inset-bottom))}
+h1,.name{color:var(--ink)}
+h2{color:var(--ink);font-size:18px}
+
+/* login */
+#login:before{background:linear-gradient(135deg,#1E40AF,#2563EB 60%,#22D3EE);box-shadow:0 10px 24px rgba(37,99,235,.35)}
+.btn{background:linear-gradient(135deg,#2F6DF0,#1E4FD8);box-shadow:0 8px 20px rgba(37,99,235,.28);border-radius:16px}
+.alt{background:#EEF4FF;color:#1E4FD8;box-shadow:none;border:1px solid #DCE8FB}
+.in{background:linear-gradient(135deg,#22B35E,#15803D)}
+.outb{background:linear-gradient(135deg,#F0714F,#DC2626)}
+.link,.back,.sm{color:#2563EB}
+
+/* greeting row */
+.panel>.top{background:none;border:0;box-shadow:none;padding:2px 2px;margin-bottom:16px}
+.who{display:flex;align-items:center;gap:12px}
+.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:18px;background:linear-gradient(135deg,#2563EB,#22D3EE)}
+.top .name{font-size:18px;line-height:1.4}
+.top .hello{font-size:13px;line-height:1.5}
+.top .sm{background:#fff;border:0;border-radius:12px;box-shadow:0 2px 10px rgba(30,64,175,.10);padding:9px 14px}
+
+/* hero card */
+#p-home{background:none;border:0;box-shadow:none;padding:0}
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:20px 20px 22px;color:#fff;background:linear-gradient(160deg,#1E40AF 0%,#2563EB 70%);box-shadow:0 16px 34px rgba(37,99,235,.28)}
+.hero:after{content:"";position:absolute;left:-18%;bottom:-86px;width:78%;height:170px;border-radius:50%;background:var(--cyan);opacity:.5;transform:rotate(-8deg);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hdate{font-size:13px;opacity:.88;font-weight:700}
+.clock{font-size:42px;font-weight:800;line-height:1.25;margin-top:4px;letter-spacing:-.5px}
+.hero .status{color:#fff;text-align:start;margin:2px 0 18px;max-width:none;font-size:15px;font-weight:700;opacity:.95}
+.thero{padding-bottom:26px}
+.thero .status{margin-bottom:0}
+
+/* the main action button: wide, white, colored text */
+.big{width:100%;height:auto;min-height:56px;margin:0;border:0;outline:0;border-radius:17px;padding:15px;
+ background:#fff;color:#16A34A;font-size:18px;font-weight:800;box-shadow:0 8px 20px rgba(11,27,58,.22);
+ display:flex;align-items:center;justify-content:center;gap:10px}
+.big:before{content:"📍"}
+.big.out{background:#fff;color:#DC2626;outline:0;box-shadow:0 8px 20px rgba(11,27,58,.22)}
+.big.out:before{content:"🚪"}
+.big:disabled{opacity:.7;color:#64748B}
+.big:disabled:before{content:"✅"}
+#s-msg{margin-top:14px;font-weight:700}
+
+/* teacher stat tiles */
+.stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.stat{border:0;border-radius:20px;padding:14px 6px;min-height:104px;box-shadow:0 2px 12px rgba(30,64,175,.08)}
+.stat:before{display:grid;place-items:center;width:38px;height:38px;margin:0 auto 6px;border-radius:50%;font-size:18px;background:#EAF1FF}
+.stat[data-k=present]:before{content:"✅";background:#DCFCE7}
+.stat[data-k=late]:before{content:"⏰";background:#FEF3C7}
+.stat[data-k=absent]:before{content:"🚫";background:#FEE2E2}
+.stat[data-k=forgot]:before{content:"🕘";background:#E0E7FF}
+.stat[data-k=outside]:before{content:"📍";background:#DBEAFE}
+.stat b{font-size:24px;color:var(--ink);line-height:1.2}
+.stat span{font-size:12px;line-height:1.4}
+.stat.on{border:0;background:#EAF1FF;box-shadow:0 0 0 2px #2563EB inset;padding:14px 6px}
+
+/* lists and panels */
+#p-abs,#p-stu,#p-set,#p-log{background:none;border:0;box-shadow:none;padding:4px 0}
+#p-abs h2,#p-stu h2,#p-set h2,#p-log h2{border:0;padding:0 2px 6px}
+.row,.entry{border:0;border-radius:18px;box-shadow:0 2px 12px rgba(30,64,175,.07)}
+.card{border:0;border-radius:20px;box-shadow:0 2px 12px rgba(30,64,175,.07)}
+.pill.b{background:#EAF2FF;color:#2563EB}
+.kind.in{color:#16A34A}.kind.out{color:#DC2626}
+.empty{background:#fff;border:1.5px dashed #D5E1F5}
+input:focus,select:focus{border-color:#2563EB;box-shadow:0 0 0 4px rgba(37,99,235,.14)}
+.ov{background:#F4F7FD}
+
+/* floating navy nav */
+.tabs{inset:auto auto calc(14px + env(safe-area-inset-bottom)) 50%;transform:translateX(-50%);width:auto;max-width:calc(100% - 24px);
+ background:var(--navy);border:0;border-radius:24px;padding:7px;gap:5px;box-shadow:0 14px 32px rgba(11,27,58,.40);
+ backdrop-filter:none;-webkit-backdrop-filter:none}
+.tabs button{flex:none;min-width:64px;min-height:54px;padding:6px 8px;border-radius:18px;color:#9FB1D6;font-size:11px}
+.tabs button i{font-size:20px;margin-bottom:1px}
+.tabs button.on{background:#fff;color:var(--navy)}
+:focus-visible{outline:3px solid #22D3EE;outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="loading"><style>@keyframes sp{to{transform:rotate(360deg)}}</style><div style="display:flex;flex-direction:column;align-items:center;gap:22px;margin-top:34vh"><img src="hp-192.png" alt="" width="96" height="96" style="border-radius:24px;box-shadow:0 12px 28px rgba(37,99,235,.25)"><div style="width:28px;height:28px;border:3px solid #DCE6FA;border-top-color:#2563EB;border-radius:50%;animation:sp .8s linear infinite"></div></div></section>
+<section id="login" class="hidden">
+  <h1 style="text-align:center;margin-top:30px">حضور وانصراف</h1>
+  <p class="sub" style="text-align:center;margin-top:6px">حصة الفيزياء · سجّل حضورك وانصرافك بضغطة واحدة.</p>
+  <div id="sform">
+    <div class="field"><label>الاسم</label><input id="fname" autocomplete="name" placeholder="اكتب اسمك كما كتبه المدرس"></div>
+    <div class="field"><label>رقم الطالب</label><input id="code" inputmode="numeric" autocomplete="off"></div>
+    <p class="error" id="serr"></p><button class="btn" id="login-s">دخول</button>
+  </div>
+  <div id="tform" class="hidden">
+    <div class="field"><label>الإيميل</label><input id="temail" inputmode="email" autocomplete="username"></div>
+    <div class="field"><label>كلمة السر</label><input id="tpass" type="password" autocomplete="current-password"></div>
+    <p class="error" id="terr"></p><button class="btn" id="login-t">دخول المدرس</button>
+    <div style="text-align:center"><button class="link" id="to-s">رجوع لدخول الطالب</button></div>
+  </div>
+</section>
+<section id="student" class="hidden">
+  <div class="panel" id="p-home">
+    <div class="top"><div class="who"><div class="av" id="s-av"></div><div><div class="name" id="s-name"></div><div class="hello" id="s-group"></div></div></div><button class="sm" id="s-logout">خروج</button></div>
+    <div class="hero"><div class="hdate" id="s-date"></div><div class="clock" id="s-clock"></div><div class="status" id="s-status"></div><button class="big" id="big">تسجيل حضور</button></div>
+    <p class="msg" id="s-msg" style="text-align:center"></p>
+  </div>
+  <div class="panel hidden" id="p-log"><h2>السجل</h2><div id="s-log"></div></div>
+</section>
+<section id="teacher" class="hidden">
+  <div class="panel" id="p-today">
+    <div class="top"><div class="who"><div class="av">م</div><div><div class="name">مرحبا بك</div><div class="hello">لوحة المدرس</div></div></div><button class="sm" id="t-logout">خروج</button></div>
+    <div class="hero thero"><div class="hdate" id="t-date"></div><div class="clock" id="t-clock"></div><div class="status">حصة الفيزياء · متابعة اليوم</div></div>
+    <div class="stats" id="counters"></div><div id="clist"></div>
+  </div>
+  <div class="panel hidden" id="p-abs">
+    <h2>تقرير الغياب والتأخير</h2><div class="field"><label>المجموعة</label><select id="r-group"></select></div>
+    <div class="field"><label>من</label><input id="r-from" type="date"></div><div class="field"><label>إلى</label><input id="r-to" type="date"></div><div id="rlist"></div>
+  </div>
+  <div class="panel hidden" id="p-stu">
+    <h2>الطلاب</h2><div class="field"><select id="f-group"></select></div><div class="field"><input id="search" placeholder="🔍 ابحث بالاسم أو الرقم"></div><div id="students"></div>
+  </div>
+  <div class="panel hidden" id="p-set">
+    <h2>الإعدادات</h2>
+    <div class="card"><b>مواعيد الحصص</b><p class="sub">اختار اليوم والساعة لكل مجموعة.</p><div id="sched"></div><button class="btn" id="sched-save">حفظ المواعيد</button><p class="msg" id="sched-msg"></p></div>
+    <div class="card"><b>مكان المدرسة</b><div class="field"><label>المسافة المسموحة (متر)</label><input id="radius" inputmode="numeric" value="30"></div><button class="btn alt" id="set-school">تحديد مكان المدرسة من موبايلي</button><p class="msg" id="school-msg"></p></div>
+    <div class="card"><b>إضافة طالب</b><div class="field"><select id="a-group"></select></div><div class="field"><input id="a-code" inputmode="numeric" placeholder="رقم الطالب"></div><div class="field"><input id="a-name" placeholder="اسم الطالب الكامل"></div><div class="field"><input id="a-guard" inputmode="tel" placeholder="رقم ولي الأمر"></div><button class="btn in" id="add-btn">إضافة الطالب</button><p class="error" id="a-err"></p></div>
+    <div class="card"><b>تصدير الحضور CSV</b><div class="field"><label>من</label><input id="e-from" type="date"></div><div class="field"><label>إلى</label><input id="e-to" type="date"></div><button class="btn alt" id="export">تصدير</button></div>
+  </div>
+</section>
+</div>
+<div class="ov hidden" id="ov"><div class="wrap">
+  <button class="back" id="ov-back">← رجوع</button><div class="hello" id="d-code"></div><div class="name" id="d-name"></div>
+  <div class="card">
+    <div class="field" style="margin-top:0"><label>الاسم</label><input id="d-name-in"></div><button class="btn alt" id="d-name-save">حفظ الاسم</button>
+    <div class="field"><label>المجموعة</label><select id="d-group"></select></div><button class="btn alt" id="d-group-save">حفظ المجموعة</button>
+    <div class="field"><label>رقم ولي الأمر</label><input id="d-guard" inputmode="tel"></div><button class="btn alt" id="d-guard-save">حفظ الرقم</button>
+    <button class="btn alt" id="d-wa">💬 واتساب لولي الأمر</button><p class="msg" id="d-msg"></p>
+  </div>
+  <div class="card"><div class="hello">الشهر الأول</div><div class="name" id="d-paid"></div><button class="btn alt" id="d-paid-btn">تغيير حالة الدفع</button></div>
+  <div class="card"><b>تسجيل يدوي</b><button class="btn in" id="m-in">تسجيل حضور الآن</button><button class="btn outb" id="m-out">تسجيل انصراف الآن</button></div>
+  <button class="btn alt" id="d-unbind">فك ربط الحساب (لو غيّر موبايله)</button>
+  <div style="margin-top:22px"><h2>السجل</h2><div id="d-log"></div></div><button class="btn outb" id="d-del">حذف الطالب</button>
+</div></div>
+<nav class="tabs hidden" id="stabs"><button class="on" data-p="p-home"><i>🏠</i>الرئيسية</button><button data-p="p-log"><i>🕘</i>السجل</button></nav>
+<nav class="tabs hidden" id="ttabs"><button class="on" data-p="p-today"><i>📅</i>اليوم</button><button data-p="p-abs"><i>🚫</i>الغياب</button><button data-p="p-stu"><i>👥</i>الطلاب</button><button data-p="p-set"><i>⚙️</i>الإعدادات</button></nav>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInAnonymously,signInWithEmailAndPassword,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getFirestore,doc,getDoc,getDocs,setDoc,updateDoc,deleteDoc,addDoc,collection,query,where,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyAXfBTspoxshk1PHViFon4gfORbFP3S7mA",authDomain:"attendance-school-2a84d.firebaseapp.com",projectId:"attendance-school-2a84d",storageBucket:"attendance-school-2a84d.firebasestorage.app",messagingSenderId:"347934096437",appId:"1:347934096437:web:f4b34dc18b814b4b64857c"});
+const auth=getAuth(app),db=getFirestore(app);
+const TEACHER="tttb58393@gmail.com",GROUPS=["أولى ثانوي","تانية ثانوي","تالتة ثانوي"],SK="attendance-student-code";
+const DAYS=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],DAY_ORDER=[6,0,1,2,3,4,5];
+const LATE_MS=10*60000,EARLY_MS=30*60000,WINDOW_DAYS=45,DAY_MS=864e5;
+let sched={};
+const $=id=>document.getElementById(id),norm=s=>String(s||"").replace(/\s+/g," ").trim();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const AR_DATE=new Intl.DateTimeFormat("ar-EG",{weekday:"long",day:"numeric",month:"long"});
+const AR_TIME=new Intl.DateTimeFormat("ar-EG",{hour:"2-digit",minute:"2-digit",hour12:true});
+const dk=ts=>{const d=new Date(ts);return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()};
+const p2=n=>String(n).padStart(2,"0"),ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+const toRec=d=>{const x=d.data({serverTimestamps:"estimate"});return{...x,id:d.id,ts:x.ts.toMillis()}};
+const legacy=s=>(s.records||[]).map(r=>({...r,code:s.id,legacy:true}));
+function distM(a,b){const R=6371000,t=Math.PI/180,dl=(b.lat-a.lat)*t,dn=(b.lng-a.lng)*t;const x=Math.sin(dl/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dn/2)**2;return Math.round(2*R*Math.asin(Math.sqrt(x)))}
+function getLoc(){return new Promise(r=>{if(!navigator.geolocation)return r(null);navigator.geolocation.getCurrentPosition(p=>r({lat:+p.coords.latitude.toFixed(5),lng:+p.coords.longitude.toFixed(5),acc:Math.round(p.coords.accuracy)}),()=>r(null),{enableHighAccuracy:true,timeout:8000,maximumAge:60000})})}
+async function getPhoto(){let st=null;try{st=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});const v=document.createElement("video");v.playsInline=true;v.muted=true;v.srcObject=st;await v.play();await new Promise(r=>setTimeout(r,400));const z=Math.min(v.videoWidth,v.videoHeight);if(!z)return null;const c=document.createElement("canvas");c.width=c.height=240;c.getContext("2d").drawImage(v,(v.videoWidth-z)/2,(v.videoHeight-z)/2,z,z,0,0,240,240);return c.toDataURL("image/jpeg",.6)}catch{return null}finally{st&&st.getTracks().forEach(t=>t.stop())}}
+function show(id){["loading","login","student","teacher"].forEach(s=>$(s).classList.toggle("hidden",s!==id));$("stabs").classList.toggle("hidden",id!=="student");$("ttabs").classList.toggle("hidden",id!=="teacher")}
+function fillGroups(sel,cur,all){sel.innerHTML=(all?'<option value="">كل المجموعات</option>':"")+GROUPS.map(g=>`<option>${g}</option>`).join("");sel.value=cur||(all?"":GROUPS[0])}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{const nav=b.parentElement;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));const sec=nav.id==="stabs"?$("student"):$("teacher");sec.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden",p.id!==b.dataset.p));if(b.dataset.p==="p-abs")renderReport()}));
+const photoFresh=r=>r.photoId&&Date.now()-Number(r.photoId)<DAY_MS;
+function logHTML(recs,T){return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${photoFresh(r)?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}${r.method==="bio"?" (بصمة)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>'}
+function loadThumbs(box){box.querySelectorAll("img[data-p]").forEach(i=>getDoc(doc(db,"students",i.dataset.c,"photos",i.dataset.p)).then(s=>{if(s.exists())i.src=s.data().img;else i.remove()}).catch(()=>{}))}
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+async function bioSupported(){try{return !!window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()}catch{return false}}
+async function bioVerify(){const ch=crypto.getRandomValues(new Uint8Array(32));if(!me.credId){const c=await navigator.credentials.create({publicKey:{challenge:ch,rp:{name:"حضور وانصراف"},user:{id:new TextEncoder().encode(me.code),name:me.code,displayName:me.name},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"discouraged"},timeout:60000}});me.credId=b64(c.rawId);await updateDoc(doc(db,"students",me.code),{credId:me.credId})}else{await navigator.credentials.get({publicKey:{challenge:ch,allowCredentials:[{type:"public-key",id:unb64(me.credId)}],userVerification:"required",timeout:60000}})}}
+let me=null,myAtt=[],unsubMine=null,unsubSched=null;
+const lastToday=recs=>{const k=dk(Date.now());const t=recs.filter(r=>dk(r.ts)===k).sort((a,b)=>a.ts-b.ts);return t[t.length-1]||null};
+const lastAny=recs=>recs.reduce((a,r)=>!a||r.ts>a.ts?r:a,null);
+function unlockAt(group,ts){let best=null;for(let i=0;i<=8;i++){const d=new Date(ts);d.setHours(0,0,0,0);d.setDate(d.getDate()+i);(sched[group]||[]).filter(x=>x.d===d.getDay()).forEach(x=>{const t=new Date(d);t.setHours(x.h,x.m,0,0);const v=t.getTime();if(v>ts&&(best===null||v<best))best=v})}if(best===null){const d=new Date(ts);d.setHours(24,0,0,0);return d.getTime()}return best-EARLY_MS}
+const isLocked=l=>!!l&&l.type==="out"&&Date.now()<unlockAt(me.group,l.ts);
+function renderStudent(){const all=myAtt.concat(me.legacy),lt=lastToday(all),la=lastAny(all),inside=lt&&lt.type==="in",done=isLocked(la);$("s-date").textContent=AR_DATE.format(Date.now());$("s-name").textContent=me.name;$("s-av").textContent=[...me.name][0]||"";$("s-group").textContent="المجموعة: "+(me.group||"غير محددة");$("big").textContent=done?"تم ✓":inside?"تسجيل انصراف":"تسجيل حضور";$("big").classList.toggle("out",!!inside);$("big").disabled=!!done;if(done){const u=unlockAt(me.group,la.ts);$("s-status").textContent="انصرفت "+AR_TIME.format(la.ts)+" · التسجيل يفتح "+AR_DATE.format(u)+" "+AR_TIME.format(u)}else $("s-status").textContent=!lt?"لم تسجّل حضور اليوم":inside?"حاضر منذ "+AR_TIME.format(lt.ts):"انصرفت الساعة "+AR_TIME.format(lt.ts);$("s-log").innerHTML=logHTML(all,false)}
+$("big").addEventListener("click",async()=>{const all=myAtt.concat(me.legacy),last=lastToday(all),type=last&&last.type==="in"?"out":"in",b=$("big");if(isLocked(lastAny(all)))return;b.disabled=true;$("s-msg").style.color="";if(me.bio){$("s-msg").textContent="ضع بصمتك أو وجهك…";try{await bioVerify()}catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما اتأكدناش من البصمة. جرّب تاني.";b.disabled=false;return}}$("s-msg").textContent="بنحدد موقعك وبنصوّرك…";const[loc,photo]=await Promise.all([getLoc(),getPhoto()]);let school=null;try{const sn=await getDoc(doc(db,"settings","school"));school=sn.exists()?sn.data():null}catch{}const dist=loc&&school&&school.lat!=null?distM(loc,school):null,out=dist!==null&&dist>(school.radius||30);let photoId=null;if(photo){const id=String(Date.now());try{await setDoc(doc(db,"students",me.code,"photos",id),{img:photo,expireAt:new Date(Date.now()+DAY_MS)});photoId=id}catch{}}try{await addDoc(collection(db,"att"),{code:me.code,uid:auth.currentUser.uid,type,ts:serverTimestamp(),loc,out,dist,method:me.bio?"bio":"photo",photoId});navigator.vibrate&&navigator.vibrate([60,40,60]);$("s-msg").textContent="✓ تم تسجيل "+(type==="in"?"الحضور":"الانصراف")+(out?" (خارج المدرسة)":"")}catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما قدرناش نحفظ التسجيل. جرّب تاني."}b.disabled=false;renderStudent()});
+$("s-logout").addEventListener("click",()=>{localStorage.removeItem(SK);unsubMine&&unsubMine();unsubMine=null;unsubSched&&unsubSched();unsubSched=null;me=null;$("code").value=$("fname").value="";show("login")});
+async function enterStudent(code,uid){const ref=doc(db,"students",code),snap=await getDoc(ref);if(!snap.exists())return{error:"الرقم ده مش مسجّل عند المدرس."};const d=snap.data();if(d.lock&&d.lock!==uid)return{error:"الرقم ده مربوط بحساب تاني. كلّم المدرس."};if(!d.lock)await updateDoc(ref,{lock:uid});me={code,name:d.name,group:d.group||"",legacy:legacy({id:code,records:d.records}),credId:d.credId||"",bio:await bioSupported()};localStorage.setItem(SK,code);show("student");renderStudent();unsubMine&&unsubMine();unsubMine=onSnapshot(query(collection(db,"att"),where("uid","==",uid)),sn=>{myAtt=sn.docs.map(toRec).filter(r=>r.code===code);renderStudent();loadThumbs($("s-log"))});unsubSched&&unsubSched();unsubSched=onSnapshot(doc(db,"settings","schedule"),sn=>{sched=sn.exists()?sn.data():{};if(me)renderStudent()});return{ok:true}}
+setInterval(()=>{if(me)renderStudent()},60000);
+$("login-s").addEventListener("click",async()=>{const code=$("code").value.trim(),name=norm($("fname").value);$("serr").textContent="";if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("serr").textContent="اكتب الاسم ورقم الطالب.";return}try{if(!auth.currentUser)await signInAnonymously(auth);const sn=await getDoc(doc(db,"students",code));if(sn.exists()&&norm(sn.data().name)!==name){$("serr").textContent="الاسم مش مطابق للي سجّله المدرس.";return}const r=await enterStudent(code,auth.currentUser.uid);if(r.error)$("serr").textContent=r.error}catch{$("serr").textContent="في مشكلة في الاتصال. جرّب تاني."}});
+function loginMode(){const t=location.hash==="#teacher";$("sform").classList.toggle("hidden",t);$("tform").classList.toggle("hidden",!t)}
+addEventListener("hashchange",loginMode);loginMode();$("to-s").addEventListener("click",()=>{location.hash=""});
+$("login-t").addEventListener("click",async()=>{$("terr").textContent="";try{await signInWithEmailAndPassword(auth,$("temail").value.trim(),$("tpass").value);$("tpass").value=""}catch{$("terr").textContent="الإيميل أو كلمة السر غلط."}});
+let students=[],att=[],priv={},detail=null,selKey="",started=false;
+const recsOf=s=>att.filter(r=>r.code===s.id).concat(legacy(s));
+function sessStart(g,date){const s=(sched[g]||[]).filter(x=>x.d===date.getDay()).sort((a,b)=>a.h*60+a.m-b.h*60-b.m)[0];if(!s)return null;const t=new Date(date);t.setHours(s.h,s.m,0,0);return t.getTime()}
+function report(from,to,group){const res=[],now=Date.now(),today=dk(now);students.filter(s=>!group||s.group===group).forEach(s=>{const recs=recsOf(s).sort((a,b)=>a.ts-b.ts);for(const d=new Date(from);d<=to;d.setDate(d.getDate()+1)){if(s.created&&d.getTime()+DAY_MS<s.created)continue;const k=dk(d.getTime()),day=recs.filter(r=>dk(r.ts)===k),st=sessStart(s.group,d),first=day.find(r=>r.type==="in");if(st&&st<now&&!first)res.push({s,d:new Date(d),t:"absent"});else if(first&&st&&first.ts>st+LATE_MS)res.push({s,d:new Date(d),t:"late"});if(day.length&&day[day.length-1].type==="in"&&k!==today)res.push({s,d:new Date(d),t:"forgot"})}});return res}
+const midnight=(off=0)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+off);return d};
+function renderToday(){$("t-date").textContent=AR_DATE.format(Date.now());const k=dk(Date.now()),rep=report(midnight(),midnight(),""),old=report(midnight(-WINDOW_DAYS),midnight(-1),"").filter(x=>x.t==="forgot");const lists={present:[],late:rep.filter(x=>x.t==="late").map(x=>x.s.name),absent:rep.filter(x=>x.t==="absent").map(x=>x.s.name),forgot:old.map(x=>x.s.name+" — "+AR_DATE.format(x.d)),outside:[]};students.forEach(s=>{const day=recsOf(s).filter(r=>dk(r.ts)===k);if(day.some(r=>r.type==="in"))lists.present.push(s.name);if(day.some(r=>r.out))lists.outside.push(s.name)});const defs=[["present","حاضر"],["late","متأخر"],["absent","غايب"],["forgot","نسي ينصرف"],["outside","من خارج المدرسة"]];$("counters").innerHTML=defs.map(([key,l])=>`<button class="stat${selKey===key?" on":""}" data-k="${key}"><b>${lists[key].length}</b><span>${l}</span></button>`).join("");$("clist").innerHTML=selKey?(lists[selKey].map(n=>`<div class="row"><span class="sname">${esc(n)}</span></div>`).join("")||'<div class="empty">لا أحد</div>'):'<div class="empty">اضغط على أي عدّاد لتشوف الأسماء</div>';$("counters").onclick=e=>{const b=e.target.closest("[data-k]");if(b){selKey=selKey===b.dataset.k?"":b.dataset.k;renderToday()}}}
+function waLink(num,text){let n=String(num||"").replace(/\D/g,"");if(!n)return"";if(n.startsWith("00"))n=n.slice(2);else if(n.startsWith("0"))n="20"+n.slice(1);return"https://wa.me/"+n+"?text="+encodeURIComponent(text)}
+function renderReport(){const g=$("r-group").value,from=new Date($("r-from").value+"T00:00:00"),to=new Date($("r-to").value+"T00:00:00");if(isNaN(from)||isNaN(to)){$("rlist").innerHTML="";return}const L={absent:["غايب","o","تغيّب عن"],late:["متأخر","b","تأخّر عن"],forgot:["نسي ينصرف","o","نسي تسجيل الانصراف في"]};const rows=report(from,to,g).sort((a,b)=>b.d-a.d||a.s.name.localeCompare(b.s.name,"ar"));$("rlist").innerHTML=rows.map(x=>{const[l,c,v]=L[x.t],txt="السلام عليكم، الطالب "+x.s.name+" "+v+" حصة الفيزياء يوم "+AR_DATE.format(x.d)+".",href=waLink((priv[x.s.id]||{}).guardian,txt);return`<div class="row"><div><div class="sname">${esc(x.s.name)}</div><div class="scode">${AR_DATE.format(x.d)}</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill ${c}">${l}</span>${href?`<a href="${href}" target="_blank" rel="noopener" style="font-size:22px;text-decoration:none">💬</a>`:""}</div></div>`}).join("")||'<div class="empty">لا يوجد غياب أو تأخير في الفترة دي 👌</div>'}
+["r-group","r-from","r-to"].forEach(i=>$(i).addEventListener("change",renderReport));
+function renderStudents(){const g=$("f-group").value,q=norm($("search").value).toLowerCase(),k=dk(Date.now());const list=students.filter(s=>(!g||s.group===g)&&(!q||norm(s.name).toLowerCase().includes(q)||s.id.toLowerCase().includes(q))).sort((a,b)=>norm(a.name).localeCompare(norm(b.name),"ar"));$("students").innerHTML=list.map(s=>{const day=recsOf(s).filter(r=>dk(r.ts)===k).sort((a,b)=>a.ts-b.ts),l=day[day.length-1],st=!l?["لم يسجّل",""]:l.type==="in"?["حاضر","g"]:["انصرف","o"];return`<button class="row" data-id="${esc(s.id)}"><div><div class="sname">${esc(s.name)}</div><div class="scode">${esc(s.id)} · ${esc(s.group||"بدون مجموعة")}</div></div><span class="pill ${st[1]}">${st[0]}</span></button>`}).join("")||'<div class="empty">لا يوجد طلاب</div>'}
+$("students").addEventListener("click",e=>{const b=e.target.closest("[data-id]");if(b)openDetail(b.dataset.id)});
+["f-group","search"].forEach(i=>$(i).addEventListener("input",renderStudents));
+function openDetail(id){const s=students.find(x=>x.id===id);if(!s)return;detail=s;$("ov").classList.remove("hidden");$("d-code").textContent=s.id;$("d-name").textContent=s.name;$("d-name-in").value=s.name;fillGroups($("d-group"),s.group,false);$("d-guard").value=(priv[id]||{}).guardian||"";$("d-paid").textContent=(priv[id]||{}).paid?"دفع":"لم يدفع بعد";$("d-msg").textContent="";renderDetailLog()}
+function renderDetailLog(){if(!detail)return;$("d-log").innerHTML=logHTML(recsOf(detail),true);loadThumbs($("d-log"))}
+$("ov-back").addEventListener("click",()=>{detail=null;$("ov").classList.add("hidden")});
+const say=t=>$("d-msg").textContent=t;
+$("d-name-save").addEventListener("click",async()=>{const v=norm($("d-name-in").value);if(!v)return;try{await updateDoc(doc(db,"students",detail.id),{name:v});$("d-name").textContent=v;say("تم حفظ الاسم.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-group-save").addEventListener("click",async()=>{try{await updateDoc(doc(db,"students",detail.id),{group:$("d-group").value});say("تم حفظ المجموعة.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-guard-save").addEventListener("click",async()=>{try{const v=norm($("d-guard").value);await setDoc(doc(db,"private",detail.id),{guardian:v},{merge:true});(priv[detail.id]||(priv[detail.id]={})).guardian=v;say("تم حفظ الرقم.")}catch{say("ما قدرناش نحفظ.")}});
+$("d-wa").addEventListener("click",()=>{const h=waLink($("d-guard").value,"السلام عليكم، بخصوص الطالب "+detail.name+" في حصة الفيزياء: ");if(!h)return say("اكتب رقم ولي الأمر الأول.");window.open(h,"_blank","noopener")});
+$("d-paid-btn").addEventListener("click",async()=>{const n=!(priv[detail.id]||{}).paid;try{await setDoc(doc(db,"private",detail.id),{paid:n},{merge:true});(priv[detail.id]||(priv[detail.id]={})).paid=n;$("d-paid").textContent=n?"دفع":"لم يدفع بعد"}catch{say("ما قدرناش نغيّر.")}});
+$("d-unbind").addEventListener("click",async()=>{try{await updateDoc(doc(db,"students",detail.id),{lock:"",credId:""});say("تم فك الربط.")}catch{say("ما قدرناش نفك الربط.")}});
+["in","out"].forEach(t=>$("m-"+t).addEventListener("click",async()=>{try{await addDoc(collection(db,"att"),{code:detail.id,uid:auth.currentUser.uid,type:t,ts:serverTimestamp(),loc:null,out:false,dist:null,method:"manual",photoId:null});say("تم التسجيل.")}catch{say("ما قدرناش نسجّل.")}}));
+$("d-log").addEventListener("click",async e=>{const id=e.target.dataset.del;if(!id||!confirm("تحذف التسجيل ده؟"))return;try{if(id[0]==="L"){const ts=+id.slice(1);await updateDoc(doc(db,"students",detail.id),{records:(detail.records||[]).filter(r=>r.ts!==ts)})}else await deleteDoc(doc(db,"att",id))}catch{say("ما قدرناش نحذف.")}});
+$("d-del").addEventListener("click",async()=>{if(!confirm("تحذف الطالب وكل بياناته؟"))return;try{const id=detail.id;await deleteDoc(doc(db,"students",id));await deleteDoc(doc(db,"private",id)).catch(()=>{});detail=null;$("ov").classList.add("hidden")}catch{say("ما قدرناش نحذف.")}});
+function renderSched(){$("sched").innerHTML=GROUPS.map((g,gi)=>`<div style="margin-top:16px"><div class="sname">${g}</div>`+(sched[g]||[]).map((x,i)=>`<div class="srow"><select data-g="${gi}" data-i="${i}" data-f="d">${DAY_ORDER.map(d=>`<option value="${d}"${d===x.d?" selected":""}>${DAYS[d]}</option>`).join("")}</select><input type="time" data-g="${gi}" data-i="${i}" data-f="t" value="${p2(x.h)}:${p2(x.m)}"><button class="sm red" data-rm="${gi},${i}">✕</button></div>`).join("")+`<button class="sm" data-add="${gi}">+ إضافة حصة</button></div>`).join("")}
+$("sched").addEventListener("change",e=>{const t=e.target,g=GROUPS[t.dataset.g],x=(sched[g]||[])[t.dataset.i];if(!x)return;if(t.dataset.f==="d")x.d=+t.value;else{const[h,m]=t.value.split(":");x.h=+h;x.m=+m}});
+$("sched").addEventListener("click",e=>{const t=e.target;if(t.dataset.add!=null){const g=GROUPS[t.dataset.add];(sched[g]||(sched[g]=[])).push({d:6,h:16,m:0});renderSched()}if(t.dataset.rm){const[gi,i]=t.dataset.rm.split(",");sched[GROUPS[gi]].splice(+i,1);renderSched()}});
+$("sched-save").addEventListener("click",async()=>{try{await setDoc(doc(db,"settings","schedule"),sched);$("sched-msg").textContent="تم حفظ المواعيد.";renderToday()}catch{$("sched-msg").textContent="ما قدرناش نحفظ."}});
+$("set-school").addEventListener("click",async()=>{$("school-msg").textContent="بنحدد مكانك…";const l=await getLoc();if(!l){$("school-msg").textContent="ما قدرناش نحدد مكانك.";return}const r=+$("radius").value||30;try{await setDoc(doc(db,"settings","school"),{lat:l.lat,lng:l.lng,radius:r});$("school-msg").textContent="تم الحفظ (نطاق "+r+" متر)."}catch{$("school-msg").textContent="ما قدرناش نحفظ."}});
+$("add-btn").addEventListener("click",async()=>{const code=$("a-code").value.trim(),name=norm($("a-name").value);$("a-err").style.color="";$("a-err").textContent="";if(!/^[A-Za-z0-9]+$/.test(code)||!name){$("a-err").textContent="اكتب رقم الطالب واسمه.";return}try{const ref=doc(db,"students",code);if((await getDoc(ref)).exists()){$("a-err").textContent="الرقم ده مضاف قبل كده.";return}await setDoc(ref,{code,name,group:$("a-group").value,lock:"",records:[],created:Date.now()});await setDoc(doc(db,"private",code),{guardian:norm($("a-guard").value),paid:false});$("a-code").value=$("a-name").value=$("a-guard").value="";$("a-err").style.color="var(--in)";$("a-err").textContent="تمت الإضافة."}catch{$("a-err").textContent="ما قدرناش نضيف الطالب."}});
+$("export").addEventListener("click",()=>{const f=$("e-from").value?new Date($("e-from").value).getTime():-Infinity,t=$("e-to").value?new Date($("e-to").value).getTime()+DAY_MS:Infinity;const rows=[["الكود","الاسم","المجموعة","الوقت","النوع","خارج المدرسة"]];students.forEach(s=>recsOf(s).filter(r=>r.ts>=f&&r.ts<t).forEach(r=>rows.push([s.id,s.name,s.group||"",new Date(r.ts).toLocaleString("ar-EG"),r.type==="in"?"حضور":"انصراف",r.out?"نعم":""])));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\uFEFF"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n")],{type:"text/csv;charset=utf-8"}));a.download="attendance.csv";document.body.appendChild(a);a.click();a.remove()});
+$("t-logout").addEventListener("click",()=>signOut(auth));
+function renderAll(){renderToday();renderStudents();renderDetailLog()}
+function startTeacher(){show("teacher");if(started)return;started=true;fillGroups($("r-group"),"",true);fillGroups($("f-group"),"",true);fillGroups($("a-group"),"",false);$("r-to").value=ymd(midnight());$("r-from").value=ymd(midnight(-7));$("e-to").value=ymd(midnight());$("e-from").value=ymd(midnight(-30));onSnapshot(collection(db,"students"),sn=>{students=sn.docs.map(d=>({id:d.id,...d.data()}));if(detail)detail=students.find(x=>x.id===detail.id)||detail;renderAll()});onSnapshot(query(collection(db,"att"),where("ts",">=",new Date(Date.now()-WINDOW_DAYS*DAY_MS))),sn=>{att=sn.docs.map(toRec);renderAll()});onSnapshot(doc(db,"settings","schedule"),sn=>{sched=sn.exists()?sn.data():{};renderSched();renderAll()});getDocs(collection(db,"private")).then(sn=>{sn.forEach(d=>priv[d.id]=d.data())}).catch(()=>{})}
+const tickClock=()=>{const t=AR_TIME.format(Date.now());["s-clock","t-clock"].forEach(i=>{const e=$(i);if(e)e.textContent=t})};tickClock();setInterval(tickClock,15000);
+onAuthStateChanged(auth,async u=>{if(u&&!u.isAnonymous&&u.email===TEACHER)return startTeacher();if(u&&!u.isAnonymous){await signOut(auth);return show("login")}if(u&&u.isAnonymous){const c=localStorage.getItem(SK);if(c){try{if((await enterStudent(c,u.uid)).ok)return}catch{}}}show("login")});
+</script>
+<script>if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("hp-sw.js").catch(()=>{}));</script>
+</body>
+</html>
