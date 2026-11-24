@@ -195,9 +195,24 @@ function fillGroups(sel,cur,all){sel.innerHTML=(all?'<option value="">كل ال�
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{const nav=b.parentElement;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));const sec=nav.id==="stabs"?$("student"):$("teacher");sec.querySelectorAll(".panel").forEach(p=>p.classList.toggle("hidden",p.id!==b.dataset.p));if(b.dataset.p==="p-abs")renderReport()}));
 
 function logHTML(recs,T){
-  return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${r.photoId?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>';
+  return recs.sort((a,b)=>b.ts-a.ts).slice(0,60).map(r=>`<div class="entry">${r.photoId?`<img class="snap" data-c="${esc(r.code)}" data-p="${esc(r.photoId)}" alt="">`:""}<div style="flex:1"><div class="kind ${r.type}">${r.type==="in"?"حضور":"انصراف"}${r.method==="manual"?" (يدوي)":""}${r.method==="bio"?" (بصمة)":""}</div>${r.out?`<div class="warn">خارج المدرسة${r.dist!=null?" ("+r.dist+" م)":""}</div>`:""}<div class="dur">${AR_DATE.format(r.ts)}</div></div><div class="time">${AR_TIME.format(r.ts)}</div>${T?`<button class="sm red" data-del="${r.legacy?"L"+r.ts:r.id}">حذف</button>`:""}</div>`).join("")||'<div class="empty">لا توجد تسجيلات بعد</div>';
 }
 function loadThumbs(box){box.querySelectorAll("img[data-p]").forEach(i=>getDoc(doc(db,"students",i.dataset.c,"photos",i.dataset.p)).then(s=>{if(s.exists())i.src=s.data().img}).catch(()=>{}))}
+
+/* ===== البصمة ===== */
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+async function bioSupported(){try{return !!window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()}catch{return false}}
+async function bioVerify(){
+  const ch=crypto.getRandomValues(new Uint8Array(32));
+  if(!me.credId){
+    const c=await navigator.credentials.create({publicKey:{challenge:ch,rp:{name:"حضور وانصراف"},user:{id:new TextEncoder().encode(me.code),name:me.code,displayName:me.name},pubKeyCredParams:[{type:"public-key",alg:-7},{type:"public-key",alg:-257}],authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"discouraged"},timeout:60000}});
+    me.credId=b64(c.rawId);
+    await updateDoc(doc(db,"students",me.code),{credId:me.credId});
+  }else{
+    await navigator.credentials.get({publicKey:{challenge:ch,allowCredentials:[{type:"public-key",id:unb64(me.credId)}],userVerification:"required",timeout:60000}});
+  }
+}
 
 /* ===== الطالب ===== */
 let me=null,myAtt=[],unsubMine=null;
@@ -211,14 +226,16 @@ function renderStudent(){
 }
 $("big").addEventListener("click",async()=>{
   const last=lastToday(myAtt.concat(me.legacy)),type=last&&last.type==="in"?"out":"in",b=$("big");
-  b.disabled=true;$("s-msg").style.color="";$("s-msg").textContent="بنحدد موقعك وبنصوّرك…";
-  const[loc,photo]=await Promise.all([getLoc(),getPhoto()]);
+  b.disabled=true;$("s-msg").style.color="";
+  if(me.bio){$("s-msg").textContent="ضع بصمتك أو وجهك…";try{await bioVerify()}catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما اتأكدناش من البصمة. جرّب تاني.";b.disabled=false;return}}
+  $("s-msg").textContent=me.bio?"بنحدد موقعك…":"بنحدد موقعك وبنصوّرك…";
+  const[loc,photo]=await Promise.all([getLoc(),me.bio?null:getPhoto()]);
   let school=null;try{const sn=await getDoc(doc(db,"settings","school"));school=sn.exists()?sn.data():null}catch{}
   const dist=loc&&school&&school.lat!=null?distM(loc,school):null,out=dist!==null&&dist>(school.radius||30);
   let photoId=null;
   if(photo){const id=String(Date.now());try{await setDoc(doc(db,"students",me.code,"photos",id),{img:photo});photoId=id}catch{}}
   try{
-    await addDoc(collection(db,"att"),{code:me.code,uid:auth.currentUser.uid,type,ts:serverTimestamp(),loc,out,dist,method:"tap",photoId});
+    await addDoc(collection(db,"att"),{code:me.code,uid:auth.currentUser.uid,type,ts:serverTimestamp(),loc,out,dist,method:me.bio?"bio":"photo",photoId});
     navigator.vibrate&&navigator.vibrate([60,40,60]);
     $("s-msg").textContent="✓ تم تسجيل "+(type==="in"?"الحضور":"الانصراف")+(out?" (خارج المدرسة)":"");
   }catch{$("s-msg").style.color="var(--out)";$("s-msg").textContent="ما قدرناش نحفظ التسجيل. جرّب تاني."}
@@ -231,7 +248,7 @@ async function enterStudent(code,uid){
   const d=snap.data();
   if(d.lock&&d.lock!==uid)return{error:"الرقم ده مربوط بحساب تاني. كلّم المدرس."};
   if(!d.lock)await updateDoc(ref,{lock:uid});
-  me={code,name:d.name,group:d.group||"",legacy:legacy({id:code,records:d.records})};
+  me={code,name:d.name,group:d.group||"",legacy:legacy({id:code,records:d.records}),credId:d.credId||"",bio:await bioSupported()};
   localStorage.setItem(SK,code);show("student");renderStudent();
   unsubMine&&unsubMine();
   unsubMine=onSnapshot(query(collection(db,"att"),where("uid","==",uid)),sn=>{myAtt=sn.docs.map(toRec).filter(r=>r.code===code);renderStudent();loadThumbs($("s-log"))});
@@ -259,7 +276,6 @@ function sessStart(g,date){
   const s=(sched[g]||[]).filter(x=>x.d===date.getDay()).sort((a,b)=>a.h*60+a.m-b.h*60-b.m)[0];
   if(!s)return null;const t=new Date(date);t.setHours(s.h,s.m,0,0);return t.getTime();
 }
-/* يرجع قائمة: absent / late / forgot */
 function report(from,to,group){
   const res=[],now=Date.now(),today=dk(now);
   students.filter(s=>!group||s.group===group).forEach(s=>{
