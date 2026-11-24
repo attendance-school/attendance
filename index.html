@@ -23,7 +23,7 @@
   * { box-sizing: border-box; margin: 0; }
   body {
     font-family: "Tajawal", system-ui, sans-serif; background: var(--bg); color: var(--ink);
-    min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    min-height: 100vh; min-height: 100dvh; line-height: 1.5; -webkit-font-smoothing: antialiased;
     background-image:
       linear-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px),
       linear-gradient(90deg, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
@@ -217,6 +217,7 @@
         <div class="stat"><b id="n-none">0</b><span>لم يسجّل</span></div>
       </div>
       <div class="list-head"><h2>الطلاب</h2><span id="n-total"></span></div>
+      <div class="field" style="margin-top:12px"><input id="search" autocomplete="off" placeholder="🔍 ابحث بالاسم أو الرقم"></div>
       <div id="students" style="margin-top:12px"></div>
 
       <div id="detail" class="hidden" style="margin-top:12px">
@@ -236,6 +237,7 @@
           <div class="card-label">رقم ولي الأمر</div>
           <div class="field" style="margin-top:8px"><input id="d-guardian-in" inputmode="tel" autocomplete="off"></div>
           <button class="btn btn-in" id="guardian-save">حفظ رقم ولي الأمر</button>
+          <button class="btn btn-alt" id="wa-btn" style="color:var(--ink)">💬 مراسلة ولي الأمر على واتساب</button>
           <div class="card-label" style="margin-top:18px">الشهر الأول</div>
           <div class="paid-state" id="d-paid">—</div>
           <button class="btn btn-alt" id="paid-btn" style="color:var(--ink)">تغيير حالة الدفع</button>
@@ -607,6 +609,7 @@
     $("group-title").textContent = currentGroup === NONE ? "بدون مجموعة" : currentGroup;
     $("detail").classList.add("hidden");
     $("students").classList.remove("hidden");
+    $("search").value = "";
     renderTeacher();
   }
 
@@ -617,19 +620,24 @@
     renderGroups();
   });
 
+  $("search").addEventListener("input", () => renderTeacher());
+
   function renderTeacher() {
     $("t-date").textContent = AR_DATE.format(Date.now());
     renderGroups();
     if (!currentGroup) return;
 
+    const q = norm($("search").value).toLowerCase();
     const list = students.filter((s) => inGroup(s, currentGroup))
       .sort((a, b) => norm(a.name).localeCompare(norm(b.name), "ar"));
-    let nIn = 0, nOut = 0, nNone = 0;
+    let nIn = 0, nOut = 0, nNone = 0, shown = 0;
     const box = $("students");
     box.innerHTML = "";
     list.forEach((s) => {
       const st = studentStatus(s);
       if (st.cls === "in") nIn++; else if (st.cls === "out") nOut++; else nNone++;
+      if (q && !(norm(s.name).toLowerCase().includes(q) || String(s.code || s.id).toLowerCase().includes(q))) return;
+      shown++;
       const btn = document.createElement("button");
       btn.className = "row";
       const left = document.createElement("div");
@@ -646,6 +654,7 @@
       box.appendChild(btn);
     });
     if (!list.length) box.innerHTML = '<div class="empty">ما فيه طلاب في المجموعة دي</div>';
+    else if (!shown) box.innerHTML = '<div class="empty">مفيش نتائج للبحث ده</div>';
     $("n-in").textContent = nIn;
     $("n-out").textContent = nOut;
     $("n-none").textContent = nNone;
@@ -690,6 +699,7 @@
 
   async function deleteRecord(ts) {
     if (!detail) return;
+    if (!confirm("تحذف التسجيل ده؟")) return;
     const left = (detail.records || []).filter((r) => r.ts !== ts);
     try {
       await updateDoc(doc(db, "students", detail.id), { records: left });
@@ -726,6 +736,15 @@
     } catch { $("d-msg").textContent = "ما قدرناش نحفظ الرقم."; }
   });
 
+  $("wa-btn").addEventListener("click", () => {
+    let n = $("d-guardian-in").value.replace(/\D/g, "");
+    if (!n) { $("d-msg").textContent = "اكتب رقم ولي الأمر الأول."; return; }
+    if (n.startsWith("00")) n = n.slice(2);
+    else if (n.startsWith("0")) n = "20" + n.slice(1);
+    const msg = "السلام عليكم، بخصوص الطالب " + $("d-name").textContent + " في حصة الفيزياء: ";
+    window.open("https://wa.me/" + n + "?text=" + encodeURIComponent(msg), "_blank", "noopener");
+  });
+
   $("paid-btn").addEventListener("click", async () => {
     if (!detail) return;
     const next = !privInfo.paid;
@@ -746,6 +765,7 @@
 
   $("del-student").addEventListener("click", async () => {
     if (!detail) return;
+    if (!confirm("متأكد إنك عايز تحذف الطالب وكل تسجيلاته؟")) return;
     try {
       await deleteDoc(doc(db, "students", detail.id));
       await deleteDoc(doc(db, "private", detail.id)).catch(() => {});
